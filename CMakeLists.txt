@@ -49,7 +49,7 @@ find_package(Qt6 REQUIRED COMPONENTS
         Core5Compat
         Quick
         )
-QT_WRAP_UI(RESOURCES ${RESOURCES})
+QT_WRAP_UI(UI_RESOURCES ${RESOURCES})
 
 add_executable(netDisk
         ${HEADERS}
