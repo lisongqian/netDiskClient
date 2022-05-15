@@ -31,6 +31,12 @@ static string Map2String(const std::map<string, string> &m) {
     return result;
 }
 
+static std::map<string,string> string_to_map(const string str){
+    std::map<string,string> m;
+
+    return m;
+}
+
 enum alertLevel {
     E_DEBUG = 0,
     E_INFO,

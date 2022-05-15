@@ -7,14 +7,17 @@
 
 #include <QMainWindow>
 #include "ui_mainWindow.h"
+#include "LoginDialog.h"
 
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    void add_connection(LoginDialog *dialog) const;
     ~MainWindow() override = default;
-
+public slots:
+    void show_myself();
 private:
     Ui::MainWindow *ui;
 };

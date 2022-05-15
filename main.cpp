@@ -1,22 +1,14 @@
 #include <iostream>
 #include <map>
 #include <QApplication>
-#include <QMainWindow>
 #include <QTextCodec>
-
-#ifdef UNIX
-#include <pthread.h>
-#else
-
-#include <WinSock2.h>
-
-#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
-#endif
-
+#include <QFile>
+#include <QObject>
 #include "log/log.h"
 #include "common.h"
 #include "config.h"
 #include "MainWindow.h"
+#include "LoginDialog.h"
 
 using std::string;
 using std::cout;
@@ -32,10 +24,16 @@ int main(int argc, char **argv) {
     map<string, string> m;
     m["data"] = "123";
     LOG_INFO(Map2String(m).c_str())
-    QTextCodec::setCodecForLocale( QTextCodec :: codecForName("UTF-8"));
-    QApplication app(argc,argv);
-    MainWindow mainWindow;
-    mainWindow.show();
-    QApplication::exec(); //应用程序运行
-    return 0;
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    QApplication app(argc, argv);
+    QFile qss(":/main.qss");
+    qss.open(QFile::ReadOnly);
+    app.setStyleSheet(qss.readAll());
+    qss.close();
+    static MainWindow mainWindow;
+    LoginDialog dlg;
+    mainWindow.add_connection(&dlg);
+    dlg.show();
+    return QApplication::exec(); //应用程序运行
+
 }

@@ -14,24 +14,26 @@ set(HEADERS
         config.h
         request/HTTPRequest.h
         MainWindow.h
-        )
+        LoginDialog.h)
 
 set(SOURCES
         main.cpp
         log/log.cpp
         request/HTTPRequest.cpp
         MainWindow.cpp
-        )
+        LoginDialog.cpp)
 
 set(RESOURCES
         mainWindow.ui
+        login.ui
         )
 
-set(QMLS
+set(QRC
+        sources/main.qrc
         )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-#include_directories($ENV{QTDIR6_MINGW_64}/include)
+INCLUDE_DIRECTORIES("rapidjson/")
 
 if (UNIX)
     add_definitions(-DUNIX)
@@ -55,7 +57,7 @@ add_executable(netDisk
         ${HEADERS}
         ${SOURCES}
         ${RESOURCES}
-        ${QMLS}
+        ${QRC}
         )
 
 target_link_libraries(netDisk PRIVATE

@@ -8,12 +8,12 @@ HTTPRequest::HTTPRequest(const std::string &ip, int port) : m_ip(ip), m_port(por
 
 }
 
-bool HTTPRequest::Get(std::string url, map<string, string> data) {
+bool HTTPRequest::Get(std::string url, map<string, string> data,std::string &response) {
 
     return true;
 }
 
-bool HTTPRequest::Post(std::string url, map<string, string> data) {
+bool HTTPRequest::Post(std::string url, map<string, string> data,std::string &response) {
     return true;
 }
 

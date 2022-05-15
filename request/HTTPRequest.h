@@ -14,8 +14,8 @@ class HTTPRequest {
 public:
     HTTPRequest(const std::string& ip, int port);
     ~HTTPRequest() =default;
-    bool Get(std::string url,map<string,string> data);
-    bool Post(std::string url,map<string,string> data);
+    bool Get(std::string url,map<string,string> data,string &response);
+    bool Post(std::string url,map<string,string> data,string &response);
 private:
     std::string m_ip;
     int m_port;
