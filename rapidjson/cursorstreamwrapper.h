@@ -55,9 +55,9 @@ public:
         return ch;
     }
 
-    //! get the error line number, if error exists.
+    //! Get the error line number, if error exists.
     size_t GetLine() const { return line_; }
-    //! get the error column number, if error exists.
+    //! Get the error column number, if error exists.
     size_t GetColumn() const { return col_; }
 
 private:

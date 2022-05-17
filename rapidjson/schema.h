@@ -1714,7 +1714,7 @@ public:
 
     const SValue& GetURI() const { return uri_; }
 
-    //! get the root schema.
+    //! Get the root schema.
     const SchemaType& GetRoot() const { return *root_; }
 
 private:
@@ -1806,7 +1806,7 @@ private:
                                 // JSON pointer fragment, absolute in the remote schema
                                 const PointerType pointer(s, len, allocator_);
                                 if (pointer.IsValid()) {
-                                    // get the subschema
+                                    // Get the subschema
                                     if (const SchemaType *sc = remoteDocument->GetSchema(pointer)) {
                                         if (schema)
                                             *schema = sc;
@@ -1827,7 +1827,7 @@ private:
                         // JSON pointer fragment, relative to the resolved URI
                         const PointerType relPointer(s, len, allocator_);
                         if (relPointer.IsValid()) {
-                            // get the subschema
+                            // Get the subschema
                             if (const ValueType *pv = relPointer.Get(*base)) {
                                 // Now get the absolute JSON pointer by adding relative to base
                                 PointerType pointer(basePointer);

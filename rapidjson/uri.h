@@ -51,7 +51,7 @@ public:
 
     // Use with specializations of GenericValue
     template<typename T> GenericUri(const T& uri, Allocator* allocator = 0) : uri_(), base_(), scheme_(), auth_(), path_(), query_(), frag_(), allocator_(allocator), ownAllocator_() {
-        const Ch* u = uri.template get<const Ch *>(); // TypeHelper from document.h
+        const Ch* u = uri.template Get<const Ch*>(); // TypeHelper from document.h
         Parse(u, internal::StrLen<Ch>(u));
     }
 
@@ -116,7 +116,7 @@ public:
     SizeType GetFragStringLength() const { return frag_ == 0 ? 0 : internal::StrLen<Ch>(frag_); }
 
 #if RAPIDJSON_HAS_STDSTRING
-    static String get(const GenericUri& uri) { return String(uri.GetString(), uri.GetStringLength()); }
+    static String Get(const GenericUri& uri) { return String(uri.GetString(), uri.GetStringLength()); }
     static String GetBase(const GenericUri& uri) { return String(uri.GetBaseString(), uri.GetBaseStringLength()); }
     static String GetScheme(const GenericUri& uri) { return String(uri.GetSchemeString(), uri.GetSchemeStringLength()); }
     static String GetAuth(const GenericUri& uri) { return String(uri.GetAuthString(), uri.GetAuthStringLength()); }
@@ -225,7 +225,7 @@ public:
         return resuri;
     }
 
-    //! get the allocator of this GenericUri.
+    //! Get the allocator of this GenericUri.
     Allocator& GetAllocator() { return *allocator_; }
 
 private:
@@ -415,7 +415,7 @@ private:
 
         // Loop through each segment in original path_
         while (pathpos < pathlen) {
-            // get next segment, bounded by '/' or end
+            // Get next segment, bounded by '/' or end
             size_t slashpos = 0;
             while ((pathpos + slashpos) < pathlen) {
                 if (path_[pathpos + slashpos] == '/') break;

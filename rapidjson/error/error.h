@@ -112,9 +112,9 @@ public:
     //! Constructor to set an error.
     ParseResult(ParseErrorCode code, size_t offset) : code_(code), offset_(offset) {}
 
-    //! get the error code.
+    //! Get the error code.
     ParseErrorCode Code() const { return code_; }
-    //! get the error offset, if \ref IsError(), 0 otherwise.
+    //! Get the error offset, if \ref IsError(), 0 otherwise.
     size_t Offset() const { return offset_; }
 
     //! Explicit conversion to \c bool, returns \c true, iff !\ref IsError().

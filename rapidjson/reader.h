@@ -681,10 +681,10 @@ public:
     //! Whether a parse error has occurred in the last parsing.
     bool HasParseError() const { return parseResult_.IsError(); }
 
-    //! get the \ref ParseErrorCode of last parsing.
+    //! Get the \ref ParseErrorCode of last parsing.
     ParseErrorCode GetParseErrorCode() const { return parseResult_.Code(); }
 
-    //! get the position of last parsing error in input, 0 otherwise.
+    //! Get the position of last parsing error in input, 0 otherwise.
     size_t GetErrorOffset() const { return parseResult_.Offset(); }
 
 protected:
@@ -2084,7 +2084,7 @@ private:
                 RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorObjectMissName, is.Tell());
                 return IterativeParsingErrorState;
             }
-            // get member count.
+            // Get member count.
             SizeType c = *stack_.template Pop<SizeType>(1);
             // If the object is not empty, count the last member.
             if (src == IterativeParsingMemberValueState)
@@ -2114,7 +2114,7 @@ private:
                 RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorValueInvalid, is.Tell());
                 return IterativeParsingErrorState;
             }
-            // get element count.
+            // Get element count.
             SizeType c = *stack_.template Pop<SizeType>(1);
             // If the array is not empty, count the last element.
             if (src == IterativeParsingElementState)
