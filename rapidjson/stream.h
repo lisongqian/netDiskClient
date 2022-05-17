@@ -41,7 +41,7 @@ concept Stream {
     //! Read the current character from stream and moving the read cursor to next character.
     Ch Take();
 
-    //! Get the current read cursor.
+    //! get the current read cursor.
     //! \return Number of characters read from start.
     size_t Tell();
 

@@ -22,17 +22,17 @@ static string Map2String(const std::map<string, string> &m) {
     string result = "{";
     char tmp[1024];
     memset(tmp, '\0', sizeof(tmp));
-    for (auto& item: m) {
-        snprintf(tmp,sizeof (tmp)-1,"%s:'%s',",item.first.c_str(),item.second.c_str());
+    for (auto &item: m) {
+        snprintf(tmp, sizeof(tmp) - 1, "%s:'%s',", item.first.c_str(), item.second.c_str());
         result += tmp;
         memset(tmp, '\0', sizeof(tmp));
     }
-    result[result.length()-1] = '}';
+    result[result.length() - 1] = '}';
     return result;
 }
 
-static std::map<string,string> string_to_map(const string str){
-    std::map<string,string> m;
+static std::map<string, string> string_to_map(const string str) {
+    std::map<string, string> m;
 
     return m;
 }

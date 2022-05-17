@@ -338,24 +338,24 @@ public:
     //! Check whether this is a valid pointer.
     bool IsValid() const { return parseErrorCode_ == kPointerParseErrorNone; }
 
-    //! Get the parsing error offset in code unit.
+    //! get the parsing error offset in code unit.
     size_t GetParseErrorOffset() const { return parseErrorOffset_; }
 
-    //! Get the parsing error code.
+    //! get the parsing error code.
     PointerParseErrorCode GetParseErrorCode() const { return parseErrorCode_; }
 
     //@}
 
-    //! Get the allocator of this pointer.
+    //! get the allocator of this pointer.
     Allocator& GetAllocator() { return *allocator_; }
 
     //!@name Tokens
     //@{
 
-    //! Get the token array (const version only).
+    //! get the token array (const version only).
     const Token* GetTokens() const { return tokens_; }
 
-    //! Get the number of tokens.
+    //! get the number of tokens.
     size_t GetTokenCount() const { return tokenCount_; }
 
     //@}
@@ -650,7 +650,7 @@ public:
 
     //! Query a value in a subtree with default value.
     /*!
-        Similar to Get(), but if the specified value do not exists, it creates all parents and clone the default value.
+        Similar to get(), but if the specified value do not exists, it creates all parents and clone the default value.
         So that this function always succeed.
 
         \param root Root value of a DOM sub-tree to be resolved. It can be any value other than document root.

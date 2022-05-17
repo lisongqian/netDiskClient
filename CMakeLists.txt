@@ -60,6 +60,9 @@ add_executable(netDisk
         ${QRC}
         )
 
+add_executable(test
+        test.cpp)
+
 target_link_libraries(netDisk PRIVATE
         Qt6::Core
         Qt6::Gui

@@ -28,7 +28,7 @@ bool Log::Init(int log_buff_size) {
     char logFileName[256] = {0};
     time_t now_t = time(nullptr);
     struct tm *now_tm = localtime(&now_t);
-    snprintf(logFileName, 255, "/tmp/netDisk_%d_%02d_%02d.log", now_tm->tm_year + 1900, now_tm->tm_mon + 1,
+    snprintf(logFileName, 255, "./tmp/netDisk_%d_%02d_%02d.log", now_tm->tm_year + 1900, now_tm->tm_mon + 1,
              now_tm->tm_mday);
 
     if (m_fp == nullptr) {

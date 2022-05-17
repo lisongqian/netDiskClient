@@ -7,18 +7,32 @@
 
 #include <iostream>
 #include <map>
+
+#ifdef UNIX
+#include <pthread.h>
+#else
+
+#include <WinSock2.h>
+
+#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
+#endif
+
 using std::map;
 using std::string;
 
 class HTTPRequest {
 public:
-    HTTPRequest(const std::string& ip, int port);
-    ~HTTPRequest() =default;
-    bool Get(std::string url,map<string,string> data,string &response);
-    bool Post(std::string url,map<string,string> data,string &response);
+    HTTPRequest(std::string  ip, int port);
+    ~HTTPRequest();
+    bool init();
+    bool close_socket() const;
+    bool get(std::string url, const map<string,string>& data, string &response);
+    bool post(std::string url, map<string,string> data, string &response);
 private:
     std::string m_ip;
     int m_port;
+    bool m_open;
+    SOCKET m_socket;
 };
 
 

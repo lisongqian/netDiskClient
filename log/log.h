@@ -16,6 +16,7 @@
 #endif
 
 #include <queue>
+#include "common.h"
 #include "../lock/locker.h"
 
 using std::string;

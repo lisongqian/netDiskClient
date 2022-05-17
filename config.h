@@ -7,11 +7,15 @@
 
 #include <getopt.h>
 #include <cstdlib>
+#include <cstring>
 
-class Config{
+using std::string;
+
+class Config {
 public:
-    Config():port(23450),buff_size(2048),database_connect_num(8){}
-    void ParseArg(int argc,char* argv[]){
+    Config() : port(23450), buff_size(2048), database_connect_num(8), login_cache_path("./tmp/login.cache") {}
+
+    void ParseArg(int argc, char *argv[]) {
         int opt;
         const char *str = "p:b:d:";
         while ((opt = getopt(argc, argv, str)) != -1) {
@@ -33,8 +37,11 @@ public:
             }
         }
     }
+
     int port;
     int buff_size;
     int database_connect_num;
+    string login_cache_path;
 };
+
 #endif //NETDISK_CONFIG_H

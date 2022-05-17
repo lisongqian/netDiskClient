@@ -23,9 +23,11 @@ border-width:1px;
 QTabBar::tab:first{border-top-left-radius: 15px;}
 QTabBar::tab:last{border-top-right-radius: 15px;}
 QTabBar::tab:selected{
+color: #000000;
 background-color: #ffffff;
 }
 QTabBar::tab:!selected{
+color: #73767a;
 background-color:#f0f0f0;
 }
 QTabWidget{
@@ -35,8 +37,8 @@ QLineEdit
 {
 background-color: #f0f0f0;
 border:1px solid #dcdfe6;
-border-radius:10px;
-padding:2px 4px;
+border-radius:5px;
+padding:2px 8px;
 }
 QLineEdit:hover{
 border-color: #c0c4cc;
@@ -49,7 +51,7 @@ border-color: #409EFF;
 QPushButton{
 color: #ffffff;
 background-color: #409EFF;
-border-radius: 10px;
+border-radius: 5px;
 }
 QPushButton:pressed,QPushButton:hover{
 background-color: #79bbff;

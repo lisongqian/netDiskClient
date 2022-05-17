@@ -90,15 +90,52 @@
     <widget class="QLineEdit" name="userName">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>24</x>
        <y>20</y>
-       <width>291</width>
-       <height>51</height>
+       <width>271</width>
+       <height>45</height>
       </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>115</red>
+           <green>118</green>
+           <blue>122</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
      </property>
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -129,15 +166,52 @@
     <widget class="QLineEdit" name="password">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>291</width>
-       <height>51</height>
+       <x>24</x>
+       <y>80</y>
+       <width>271</width>
+       <height>45</height>
       </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>115</red>
+           <green>118</green>
+           <blue>122</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
      </property>
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -155,6 +229,9 @@
      <property name="maxLength">
       <number>30</number>
      </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
      <property name="placeholderText">
       <string>请输入密码</string>
      </property>
@@ -165,10 +242,10 @@
     <widget class="QPushButton" name="loginButton">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>180</y>
-       <width>291</width>
-       <height>51</height>
+       <x>24</x>
+       <y>160</y>
+       <width>271</width>
+       <height>45</height>
       </rect>
      </property>
      <property name="font">
@@ -191,15 +268,52 @@
     <widget class="QLineEdit" name="rUserName">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>24</x>
        <y>20</y>
-       <width>291</width>
-       <height>51</height>
+       <width>271</width>
+       <height>45</height>
       </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>115</red>
+           <green>118</green>
+           <blue>122</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
      </property>
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -224,15 +338,52 @@
     <widget class="QLineEdit" name="rPassword">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>291</width>
-       <height>51</height>
+       <x>24</x>
+       <y>80</y>
+       <width>271</width>
+       <height>45</height>
       </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>115</red>
+           <green>118</green>
+           <blue>122</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
      </property>
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -250,6 +401,9 @@
      <property name="maxLength">
       <number>30</number>
      </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
      <property name="placeholderText">
       <string>请输入密码</string>
      </property>
@@ -257,10 +411,10 @@
     <widget class="QPushButton" name="registerButton">
      <property name="geometry">
       <rect>
-       <x>170</x>
-       <y>180</y>
+       <x>164</x>
+       <y>160</y>
        <width>131</width>
-       <height>51</height>
+       <height>45</height>
       </rect>
      </property>
      <property name="font">
@@ -278,10 +432,10 @@
     <widget class="QPushButton" name="resetButton">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>180</y>
+       <x>24</x>
+       <y>160</y>
        <width>131</width>
-       <height>51</height>
+       <height>45</height>
       </rect>
      </property>
      <property name="font">

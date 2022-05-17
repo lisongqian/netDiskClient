@@ -556,7 +556,7 @@ RAPIDJSON_STATIC_ASSERT(sizeof(unsigned long) == sizeof(unsigned));
 template<typename ValueType>
 struct TypeHelper<ValueType, unsigned long> {
     static bool Is(const ValueType& v) { return v.IsUint(); }
-    static unsigned long Get(const ValueType& v) { return v.GetUint(); }
+    static unsigned long get(const ValueType& v) { return v.GetUint(); }
     static ValueType& Set(ValueType& v, unsigned long data) { return v.SetUint(data); }
     static ValueType& Set(ValueType& v, unsigned long data, typename ValueType::AllocatorType&) { return v.SetUint(data); }
 };
@@ -608,7 +608,7 @@ template<typename ValueType>
 struct TypeHelper<ValueType, std::basic_string<typename ValueType::Ch> > {
     typedef std::basic_string<typename ValueType::Ch> StringType;
     static bool Is(const ValueType& v) { return v.IsString(); }
-    static StringType Get(const ValueType& v) { return StringType(v.GetString(), v.GetStringLength()); }
+    static StringType get(const ValueType& v) { return StringType(v.GetString(), v.GetStringLength()); }
     static ValueType& Set(ValueType& v, const StringType& data, typename ValueType::AllocatorType& a) { return v.SetString(data, a); }
 };
 #endif
@@ -1187,16 +1187,16 @@ public:
     /*! \post IsObject() == true */
     GenericValue& SetObject() { this->~GenericValue(); new (this) GenericValue(kObjectType); return *this; }
 
-    //! Get the number of members in the object.
+    //! get the number of members in the object.
     SizeType MemberCount() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.size; }
 
-    //! Get the capacity of object.
+    //! get the capacity of object.
     SizeType MemberCapacity() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.capacity; }
 
     //! Check whether the object is empty.
     bool ObjectEmpty() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.size == 0; }
 
-    //! Get a value from an object associated with the name.
+    //! get a value from an object associated with the name.
     /*! \pre IsObject() == true
         \tparam T Either \c Ch or \c const \c Ch (template used for disambiguation with \ref operator[](SizeType))
         \note In version 0.1x, if the member is not found, this function returns a null value. This makes issue 7.
@@ -1213,7 +1213,7 @@ public:
     template <typename T>
     RAPIDJSON_DISABLEIF_RETURN((internal::NotExpr<internal::IsSame<typename internal::RemoveConst<T>::Type, Ch> >),(const GenericValue&)) operator[](T* name) const { return const_cast<GenericValue&>(*this)[name]; }
 
-    //! Get a value from an object associated with the name.
+    //! get a value from an object associated with the name.
     /*! \pre IsObject() == true
         \tparam SourceAllocator Allocator of the \c name value
 
@@ -1243,7 +1243,7 @@ public:
     const GenericValue& operator[](const GenericValue<Encoding, SourceAllocator>& name) const { return const_cast<GenericValue&>(*this)[name]; }
 
 #if RAPIDJSON_HAS_STDSTRING
-    //! Get a value from an object associated with name (string object).
+    //! get a value from an object associated with name (string object).
     GenericValue& operator[](const std::basic_string<Ch>& name) { return (*this)[GenericValue(StringRef(name))]; }
     const GenericValue& operator[](const std::basic_string<Ch>& name) const { return (*this)[GenericValue(StringRef(name))]; }
 #endif
@@ -1624,10 +1624,10 @@ public:
     /*! \post IsArray == true */
     GenericValue& SetArray() { this->~GenericValue(); new (this) GenericValue(kArrayType); return *this; }
 
-    //! Get the number of elements in array.
+    //! get the number of elements in array.
     SizeType Size() const { RAPIDJSON_ASSERT(IsArray()); return data_.a.size; }
 
-    //! Get the capacity of array.
+    //! get the capacity of array.
     SizeType Capacity() const { RAPIDJSON_ASSERT(IsArray()); return data_.a.capacity; }
 
     //! Check whether the array is empty.
@@ -1645,7 +1645,7 @@ public:
         data_.a.size = 0;
     }
 
-    //! Get an element from array by index.
+    //! get an element from array by index.
     /*! \pre IsArray() == true
         \param index Zero-based index of element.
         \see operator[](T*)
@@ -1804,7 +1804,7 @@ public:
     int64_t GetInt64() const    { RAPIDJSON_ASSERT(data_.f.flags & kInt64Flag); return data_.n.i64; }
     uint64_t GetUint64() const  { RAPIDJSON_ASSERT(data_.f.flags & kUint64Flag); return data_.n.u64; }
 
-    //! Get the value as double type.
+    //! get the value as double type.
     /*! \note If the value is 64-bit integer type, it may lose precision. Use \c IsLosslessDouble() to check whether the converison is lossless.
     */
     double GetDouble() const {
@@ -1816,7 +1816,7 @@ public:
         RAPIDJSON_ASSERT((data_.f.flags & kUint64Flag) != 0);  return static_cast<double>(data_.n.u64); // uint64_t -> double (may lose precision)
     }
 
-    //! Get the value as float type.
+    //! get the value as float type.
     /*! \note If the value is 64-bit integer type, it may lose precision. Use \c IsLosslessFloat() to check whether the converison is lossless.
     */
     float GetFloat() const {
@@ -1837,7 +1837,7 @@ public:
 
     const Ch* GetString() const { RAPIDJSON_ASSERT(IsString()); return DataString(data_); }
 
-    //! Get the length of string.
+    //! get the length of string.
     /*! Since rapidjson permits "\\u0000" in the json string, strlen(v.GetString()) may not equal to v.GetStringLength().
     */
     SizeType GetStringLength() const { RAPIDJSON_ASSERT(IsString()); return DataStringLength(data_); }
@@ -2755,10 +2755,10 @@ public:
     //! Whether a parse error has occurred in the last parsing.
     bool HasParseError() const { return parseResult_.IsError(); }
 
-    //! Get the \ref ParseErrorCode of last parsing.
+    //! get the \ref ParseErrorCode of last parsing.
     ParseErrorCode GetParseError() const { return parseResult_.Code(); }
 
-    //! Get the position of last parsing error in input, 0 otherwise.
+    //! get the position of last parsing error in input, 0 otherwise.
     size_t GetErrorOffset() const { return parseResult_.Offset(); }
 
     //! Implicit conversion to get the last parse result
@@ -2776,13 +2776,13 @@ public:
     operator ParseResult() const { return parseResult_; }
     //!@}
 
-    //! Get the allocator of this document.
+    //! get the allocator of this document.
     Allocator& GetAllocator() {
         RAPIDJSON_ASSERT(allocator_);
         return *allocator_;
     }
 
-    //! Get the capacity of stack in bytes.
+    //! get the capacity of stack in bytes.
     size_t GetStackCapacity() const { return stack_.GetCapacity(); }
 
 private:
