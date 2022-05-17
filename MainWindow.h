@@ -15,11 +15,11 @@ Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     void add_connection(LoginDialog *dialog) const;
-    ~MainWindow() override = default;
+    ~MainWindow();
 public slots:
     void show_myself();
 private:
-    Ui::MainWindow *ui;
+    std::shared_ptr<Ui::MainWindow> ui;
 };
 
 

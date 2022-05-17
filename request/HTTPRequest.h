@@ -25,11 +25,11 @@ public:
     HTTPRequest(std::string  ip, int port);
     ~HTTPRequest();
     bool init();
-    bool close_socket() const;
-    bool get(std::string url, const map<string,string>& data, string &response);
-    bool post(std::string url, map<string,string> data, string &response);
+    bool close_socket();
+    bool get(string url, const map<string,string>& data, string &response);
+    bool post(string url, map<string,string> data, string &response);
 private:
-    std::string m_ip;
+    string m_ip;
     int m_port;
     bool m_open;
     SOCKET m_socket;

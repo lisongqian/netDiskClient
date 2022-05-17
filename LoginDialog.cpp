@@ -5,6 +5,7 @@
 //#include <QAbstractItemView>
 #include <QMessageBox>
 #include <fstream>
+#include <memory>
 #include "LoginDialog.h"
 #include "request/HTTPRequest.h"
 #include "rapidjson/document.h"
@@ -16,7 +17,7 @@ using std::string;
 using std::map;
 
 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::LoginDialog) {
+LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui( std::make_shared<Ui::LoginDialog>()) {
     ui->setupUi(this);
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
 }
@@ -49,7 +50,7 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
     string res;
     data["username"] = username;
     data["password"] = password;
-    HTTPRequest *req = new HTTPRequest("127.0.0.1", 23450);
+    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
     req->init();
     bool flag = req->post("/login", data, res);
     req->close_socket();

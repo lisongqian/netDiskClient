@@ -8,7 +8,7 @@
 #include "log/log.h"
 #include "common.h"
 
-HTTPRequest::HTTPRequest(std::string ip, int port) : m_ip(std::move(ip)), m_port(port), m_open(false), m_socket(0) {
+HTTPRequest::HTTPRequest(string ip, int port) : m_ip(std::move(ip)), m_port(port), m_open(false), m_socket(0) {
 }
 
 bool HTTPRequest::init() {
@@ -37,7 +37,7 @@ bool HTTPRequest::init() {
     return true;
 }
 
-bool HTTPRequest::get(std::string url, const map<string, string> &data, std::string &response) {
+bool HTTPRequest::get(string url, const map<string, string> &data, string &response) {
     if (!m_open) {
         return false;
     }
@@ -58,7 +58,7 @@ bool HTTPRequest::get(std::string url, const map<string, string> &data, std::str
 }
 
 
-bool HTTPRequest::post(std::string url, map<string, string> data, std::string &response) {
+bool HTTPRequest::post(string url, map<string, string> data, string &response) {
     if (!m_open) {
         return false;
     }
@@ -91,13 +91,16 @@ bool HTTPRequest::post(std::string url, map<string, string> data, std::string &r
     return false;
 }
 
-bool HTTPRequest::close_socket() const {
+bool HTTPRequest::close_socket() {
     closesocket(m_socket);
     WSACleanup();
+    m_open = false;
     return true;
 }
 
 HTTPRequest::~HTTPRequest() {
-    ;
+    if(m_open){
+        close_socket();
+    }
 }
 
