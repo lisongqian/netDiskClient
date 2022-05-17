@@ -11,7 +11,7 @@
 
 using std::string;
 
-constexpr std::uint32_t hash_str_to_uint32(const char *data) {
+constexpr std::uint32_t hash_str_to_uint32(const char *data) {  // C++ 14以上支持,11不支持使用局部变量、循环和分支等简单语句
     std::uint32_t h(0);
     for (int i = 0; data && ('\0' != data[i]); i++)
         h = (h << 6) ^ (h >> 26) ^ data[i];
@@ -37,7 +37,7 @@ static std::map<string, string> string_to_map(const string str) {
     return m;
 }
 
-enum alertLevel {
+enum class alertLevel: unsigned int {
     E_DEBUG = 0,
     E_INFO,
     E_WARN,

@@ -32,7 +32,7 @@ public:
 
     bool Init(int log_buff_size);
 
-    void WriteLogToQueue(int level, const char *format, ...);
+    void WriteLogToQueue(alertLevel level, const char *format, ...);
 
 #ifdef UNIX
     static void *FlushLogThreadU(void *args)
@@ -67,10 +67,10 @@ private:
 #endif
 };
 
-#define LOG_DEBUG(format, ...)  {Log::instance()->WriteLogToQueue(E_DEBUG, format, ##__VA_ARGS__);}
-#define LOG_INFO(format, ...) {Log::instance()->WriteLogToQueue(E_INFO, format, ##__VA_ARGS__);}
-#define LOG_WARN(format, ...) {Log::instance()->WriteLogToQueue(E_WARN, format, ##__VA_ARGS__);}
-#define LOG_ERROR(format, ...) {Log::instance()->WriteLogToQueue(E_ERROR, format, ##__VA_ARGS__);}
+#define LOG_DEBUG(format, ...)  {Log::instance()->WriteLogToQueue(alertLevel::E_DEBUG, format, ##__VA_ARGS__);}
+#define LOG_INFO(format, ...) {Log::instance()->WriteLogToQueue(alertLevel::E_INFO, format, ##__VA_ARGS__);}
+#define LOG_WARN(format, ...) {Log::instance()->WriteLogToQueue(alertLevel::E_WARN, format, ##__VA_ARGS__);}
+#define LOG_ERROR(format, ...) {Log::instance()->WriteLogToQueue(alertLevel::E_ERROR, format, ##__VA_ARGS__);}
 
 
 #endif //NETDISK_LOG_H

@@ -10,8 +10,7 @@ int main() {
         mkdir("./tmp");
     }
     std::string username = "lisongqian", password = "123123";
-    std::ofstream out("./tmp/login.cache.tmp");
-    if (out.is_open()) {
+    if (std::ofstream out("./tmp/login.cache.tmp");out.is_open()) {
         out << username << std::endl;
         out << password << std::endl;
         std::cout << "success" << std::endl;

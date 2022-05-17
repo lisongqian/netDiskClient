@@ -42,23 +42,23 @@ bool Log::Init(int log_buff_size) {
     return true;
 }
 
-void Log::WriteLogToQueue(int level, const char *format, ...) {
+void Log::WriteLogToQueue(alertLevel level, const char *format, ...) {
 
     char s[16] = {0};
     switch (level) {
-        case E_DEBUG: {
+        case alertLevel::E_DEBUG: {
             strcpy(s, "[debug]:");
             break;
         }
-        case E_INFO: {
+        case alertLevel::E_INFO: {
             strcpy(s, "[info]:");
             break;
         }
-        case E_WARN: {
+        case alertLevel::E_WARN: {
             strcpy(s, "[warn]:");
             break;
         }
-        case E_ERROR: {
+        case alertLevel::E_ERROR: {
             strcpy(s, "[error]:");
             break;
         }

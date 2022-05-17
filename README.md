@@ -19,6 +19,16 @@
 - [ ] P2P加速 
 - ...
 
+### C++ 11 特性
+
+1. std::shared_ptr
+2. std::move
+3. constexpr
+4. nullptr
+5. auto
+6. if中声明临时变量
+7. enum class
+
 ### 注意
 
 1. 换行符为CRLF

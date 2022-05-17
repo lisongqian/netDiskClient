@@ -27,10 +27,11 @@ int main(int argc, char **argv) {
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QApplication app(argc, argv);
-    QFile qss(":/main.qss");
-    qss.open(QFile::ReadOnly);
-    app.setStyleSheet(qss.readAll());
-    qss.close();
+    if(QFile qss(":/main.qss");qss.open(QFile::ReadOnly))
+    {
+        app.setStyleSheet(qss.readAll());
+        qss.close();
+    }
 //    string uuid = QUuid::createUuid().toString().remove("{").remove("}").remove("-").toStdString();
 //    cout << uuid << endl;
     static MainWindow mainWindow;
@@ -38,30 +39,24 @@ int main(int argc, char **argv) {
     if (0 != access("tmp", 0)) {
         mkdir("tmp");
     }
-    std::ifstream in(g_config.login_cache_path);
-    try {
-        if (in.is_open()) {
-            string username, password;
-            getline(in, username);
-            getline(in, password);
-            LOG_INFO("%s,%s", username.c_str(), password.c_str())
-            bool flag = dlg.login(username, password);
-            if (flag) {
-                mainWindow.show();
-            }
-            else {
-                mainWindow.add_connection(&dlg);
-                dlg.show();
-            }
+    if (std::ifstream in(g_config.login_cache_path);in.is_open()) {
+        string username, password;
+        getline(in, username);
+        getline(in, password);
+        LOG_INFO("%s,%s", username.c_str(), password.c_str())
+        bool flag = dlg.login(username, password);
+        if (flag) {
+            mainWindow.show();
         }
         else {
-            LOG_INFO("open file failed")
             mainWindow.add_connection(&dlg);
             dlg.show();
         }
     }
-    catch (std::exception &e) {
-
+    else {
+        LOG_INFO("open file failed")
+        mainWindow.add_connection(&dlg);
+        dlg.show();
     }
     return QApplication::exec(); //应用程序运行
 
