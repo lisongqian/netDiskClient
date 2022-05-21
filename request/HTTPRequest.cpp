@@ -70,21 +70,21 @@ bool HTTPRequest::post(string url, map<string, string> data, string &response) {
     memset(send_buff, '\0', 2048);
     int n = snprintf(send_buff, 2048, "POST\t/login\tHTTP/1.1\r\n");
     n += snprintf(send_buff + n, 2048 - n, "Connection:keep-alive\r\n");
-    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len);
+    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len + 1);
     snprintf(send_buff + n, 2048 - n, "\r\n%s", send_data);
 
-    send(m_socket, send_buff, strlen(send_buff), 0);
+    send(m_socket, send_buff, strlen(send_buff) + 1, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     char recData[2048];
     memset(recData, '\0', 2048);
     int ret = recv(m_socket, recData, 2048, 0);
     if (ret > 0) {
         recData[ret] = 0x00;
-        LOG_INFO("recv:%s", recData)
         string tmp = recData;
         int pos = tmp.rfind('\n');
         if (pos > 0) {
             response = tmp.substr(pos + 1);
+            LOG_INFO("response:%s", response.c_str())
             return true;
         }
     }

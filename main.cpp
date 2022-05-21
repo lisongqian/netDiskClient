@@ -21,24 +21,28 @@ using std::endl;
 Config g_config;
 
 int main(int argc, char **argv) {
-    // 1. 接收参数
+    // 1. 创建缓存文件目录
+    if (0 != access("tmp", 0)) {
+        mkdir("tmp");
+    }
+    // 2. 接收参数
     g_config.ParseArg(argc, argv);
     Log::instance()->Init(g_config.buff_size);
 
+    //3. 加载编码格式和样式表
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QApplication app(argc, argv);
-    if(QFile qss(":/main.qss");qss.open(QFile::ReadOnly))
+    if(QFile qss(":/common.qss");qss.open(QFile::ReadOnly))
     {
         app.setStyleSheet(qss.readAll());
         qss.close();
     }
-//    string uuid = QUuid::createUuid().toString().remove("{").remove("}").remove("-").toStdString();
-//    cout << uuid << endl;
+
+    //4. 启动窗口
     static MainWindow mainWindow;
     LoginDialog dlg;
-    if (0 != access("tmp", 0)) {
-        mkdir("tmp");
-    }
+
+    // 5. 登录窗口显示判断，打开主窗口
     if (std::ifstream in(g_config.login_cache_path);in.is_open()) {
         string username, password;
         getline(in, username);
@@ -49,13 +53,13 @@ int main(int argc, char **argv) {
             mainWindow.show();
         }
         else {
-            mainWindow.add_connection(&dlg);
+            mainWindow.addConnection(&dlg);
             dlg.show();
         }
     }
     else {
         LOG_INFO("open file failed")
-        mainWindow.add_connection(&dlg);
+        mainWindow.addConnection(&dlg);
         dlg.show();
     }
     return QApplication::exec(); //应用程序运行

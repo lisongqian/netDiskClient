@@ -14,14 +14,16 @@ set(HEADERS
         config.h
         request/HTTPRequest.h
         MainWindow.h
-        LoginDialog.h)
+        LoginDialog.h
+        components/ClickLabel.h)
 
 set(SOURCES
         main.cpp
         log/log.cpp
         request/HTTPRequest.cpp
         MainWindow.cpp
-        LoginDialog.cpp)
+        LoginDialog.cpp
+        components/ClickLabel.cpp)
 
 set(RESOURCES
         mainWindow.ui

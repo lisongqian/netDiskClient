@@ -1,5 +1,23 @@
 <RCC>
     <qresource prefix="/">
+        <file>common.qss</file>
         <file>main.qss</file>
+        <file>components.qss</file>
+
+        <file>images/cloudy.svg</file>
+        <file>images/setting.svg</file>
+        <file>images/share.svg</file>
+        <file>images/document.svg</file>
+        <file>images/refresh.svg</file>
+        <file>images/download.svg</file>
+        <file>images/upload.svg</file>
+        <file>images/cloudy-selected.svg</file>
+        <file>images/setting-selected.svg</file>
+        <file>images/share-selected.svg</file>
+        <file>images/document-selected.svg</file>
+        <file>images/refresh-selected.svg</file>
+        <file>images/download-selected.svg</file>
+        <file>images/upload-selected.svg</file>
+        <file>images/caret-right.svg</file>
     </qresource>
 </RCC>

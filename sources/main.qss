@@ -1,6 +1,3 @@
-QMainWindow,QDialog{
-background-color: #d9ecff;
-}
 QTabWidget::tab-bar
 {
 left:0px;
@@ -9,50 +6,34 @@ QTabWidget::pane
 {
 background-color: #ffffff;
 border-width:1px;
-border-bottom-left-radius: 15px;
-border-bottom-right-radius: 15px;
+border-radius: 15px;
 }
 
 QTabBar::tab{
-width: 160px;
-height:50px;
+width: 0px;
+height:0px;
 font:18px;
 background-color: #ffffff;
-border-width:1px;
-}
-QTabBar::tab:first{border-top-left-radius: 15px;}
-QTabBar::tab:last{border-top-right-radius: 15px;}
-QTabBar::tab:selected{
-color: #000000;
-background-color: #ffffff;
-}
-QTabBar::tab:!selected{
-color: #73767a;
-background-color:#f0f0f0;
-}
-QTabWidget{
-}
-/*文本输入框*/
-QLineEdit
-{
-background-color: #f0f0f0;
-border:1px solid #dcdfe6;
-border-radius:5px;
-padding:2px 8px;
-}
-QLineEdit:hover{
-border-color: #c0c4cc;
-}
-QLineEdit:focus{
-background-color: #ffffff;
-border-color: #409EFF;
+border-width:0px;
+border-radius: 0;
 }
 
-QPushButton{
-color: #ffffff;
-background-color: #409EFF;
+QListWidget{
+border: 1px solid #ffffff;
+border-radius: 5px;
+outline: none;
+font-size: 15px;
+font-weight: bold;
+}
+QListWidget::Item{
+color: #606266;
+/*margin:0px;*/
+padding: 5px 4px;
+border: 1px solid #ffffff;
 border-radius: 5px;
 }
-QPushButton:pressed,QPushButton:hover{
-background-color: #79bbff;
+QListWidget::Item:selected{
+color: #409EFF;
+background-color: rgba(64, 158, 255, 0.1);
+border-color:rgba(64, 158, 255, 0.1);
 }
