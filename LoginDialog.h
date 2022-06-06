@@ -16,15 +16,24 @@ class LoginDialog : public QDialog {
 Q_OBJECT
 public:
     explicit LoginDialog(QWidget *parent = nullptr);
-    bool login(const string& username,const string& password,bool messagebox = false);
+
+    bool login(const string &username, const string &password, bool messagebox = false);
+
     ~LoginDialog() override = default;
+
 signals:
+
     void open_main_window();
 
 private:
     std::shared_ptr<Ui::LoginDialog> ui;
 private slots:
+
     void slot_login();
+
+    void slot_register();
+
+    void slot_reset();
 };
 
 

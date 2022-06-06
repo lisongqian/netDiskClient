@@ -20,16 +20,15 @@ using std::map;
 LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()) {
     ui->setupUi(this);
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
+    connect(ui->registerButton, &QPushButton::clicked, this, &LoginDialog::slot_register);
+    connect(ui->resetButton, &QPushButton::clicked, this, &LoginDialog::slot_reset);
 }
 
 void LoginDialog::slot_login() {
     string username = ui->userName->text().toStdString();
     string password = ui->password->text().toStdString();
     if (!username.empty() && !password.empty()) {
-        map<string, string> data;
         string res;
-        data["username"] = username;
-        data["password"] = password;
         bool flag = login(username, password, true);
         if (flag) {
             emit open_main_window();
@@ -93,4 +92,58 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
             QMessageBox::information(this, "错误", "服务器或网络错误，请重试");
     }
     return false;
+}
+
+void LoginDialog::slot_register() {
+    string username = ui->rUserName->text().toStdString();
+    string password1 = ui->rPassword1->text().toStdString();
+    string password2 = ui->rPassword2->text().toStdString();
+    if (!username.empty() && !password1.empty() && !password2.empty()) {
+        if (password1 == password2) {
+            map<string, string> data;
+            string res;
+            data["username"] = username;
+            data["password1"] = password1;
+            data["password2"] = password2;
+            auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
+            req->init();
+            bool flag = req->post("/register", data, res);
+            req->close_socket();
+            if (flag) {
+                try {
+                    Document document;
+                    document.Parse(res.c_str());
+                    assert(document.IsObject());
+                    assert(document.HasMember("status"));
+                    assert(document.HasMember("code"));
+                    if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                        QMessageBox::information(this, "成功", "注册成功");
+                        ui->TabWidget->setCurrentIndex(0);
+                        this->slot_reset();
+                    }
+                    else {
+                        QMessageBox::information(this, "错误", document["msg"].GetString());
+                    }
+                }
+                catch (std::exception &e) {
+
+                }
+            }
+            else {
+                QMessageBox::information(this, "错误", "网络请求错误，请重试");
+            }
+        }
+        else {
+            QMessageBox::information(this, "错误", "两次输入的密码不一致");
+        }
+    }
+    else {
+        QMessageBox::information(this, "错误", "请填写完整信息");
+    }
+}
+
+void LoginDialog::slot_reset() {
+    ui->rUserName->clear();
+    ui->rPassword1->clear();
+    ui->rPassword2->clear();
 }

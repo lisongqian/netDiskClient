@@ -57,10 +57,9 @@ int main(int argc, char **argv) {
         }
     }
     else {
-        LOG_INFO("open file failed")
+        LOG_INFO("no login cache file")
         mainWindow.addConnection(&dlg);
         dlg.show();
     }
     return QApplication::exec(); //应用程序运行
-
 }

@@ -72,11 +72,11 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, strin
     send_data[strlen(send_data) - 1] = '\0';
     char send_buff[2048];
     memset(send_buff, '\0', 2048);
-    int n = snprintf(send_buff, 2048, "POST\t/login\tHTTP/1.1\r\n");
+    int n = snprintf(send_buff, 2048, "POST\t%s\tHTTP/1.1\r\n", url.c_str());
     n += snprintf(send_buff + n, 2048 - n, "Connection:keep-alive\r\n");
     n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len);
     snprintf(send_buff + n, 2048 - n, "\r\n%s", send_data);
-
+//    LOG_INFO("send:%s", send_buff);
     send(m_socket, send_buff, strlen(send_buff) + 1, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     char recData[2048];
