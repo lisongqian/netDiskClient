@@ -13,7 +13,7 @@ using std::string;
 
 class Config {
 public:
-    Config() : port(23450), buff_size(2048), database_connect_num(8), login_cache_path("./tmp/login.cache") {}
+    Config() : port(23450), buff_size(2048), database_connect_num(8), login_cache_path("./tmp/login.cache"),token("") {}
 
     void ParseArg(int argc, char *argv[]) {
         int opt;
@@ -42,6 +42,7 @@ public:
     int buff_size;
     int database_connect_num;
     string login_cache_path;
+    string token;
 };
 
 #endif //NETDISK_CONFIG_H

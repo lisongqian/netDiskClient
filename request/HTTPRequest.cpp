@@ -29,7 +29,7 @@ bool HTTPRequest::init() {
     serAddr.sin_addr.S_un.S_addr = inet_addr(m_ip.c_str());
     if (connect(m_socket, (sockaddr *) &serAddr, sizeof(serAddr)) == SOCKET_ERROR) {  //连接失败
         m_open = false;
-        printf("connect error !");
+        LOG_ERROR("connect error !");
         closesocket(m_socket);
         return false;
     }
@@ -37,7 +37,7 @@ bool HTTPRequest::init() {
     return true;
 }
 
-bool HTTPRequest::get(string url, const map<string, string> &data, string &response) {
+bool HTTPRequest::get(const string &url, const map<string, string> &data, string &response) const {
     if (!m_open) {
         return false;
     }
@@ -58,19 +58,23 @@ bool HTTPRequest::get(string url, const map<string, string> &data, string &respo
 }
 
 
-bool HTTPRequest::post(string url, map<string, string> data, string &response) {
+bool HTTPRequest::post(const string &url, const map<string, string> &data, string &response) const {
     if (!m_open) {
         return false;
     }
     char send_data[100];
     memset(send_data, '\0', 100);
-    int data_len = snprintf(send_data, 100, "username=%s&password=%s", data["username"].c_str(),
-                            data["password"].c_str());
+    int data_len = 0;
+    for (const auto &it: data) {
+        data_len += snprintf(send_data + data_len, 100 - data_len, "%s=%s&", it.first.c_str(),
+                             it.second.c_str());
+    }
+    send_data[strlen(send_data) - 1] = '\0';
     char send_buff[2048];
     memset(send_buff, '\0', 2048);
     int n = snprintf(send_buff, 2048, "POST\t/login\tHTTP/1.1\r\n");
     n += snprintf(send_buff + n, 2048 - n, "Connection:keep-alive\r\n");
-    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len + 1);
+    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len);
     snprintf(send_buff + n, 2048 - n, "\r\n%s", send_data);
 
     send(m_socket, send_buff, strlen(send_buff) + 1, 0);
@@ -99,7 +103,7 @@ bool HTTPRequest::close_socket() {
 }
 
 HTTPRequest::~HTTPRequest() {
-    if(m_open){
+    if (m_open) {
         close_socket();
     }
 }

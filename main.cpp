@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
     //3. 加载编码格式和样式表
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QApplication app(argc, argv);
-    if(QFile qss(":/common.qss");qss.open(QFile::ReadOnly))
-    {
+    if (QFile qss(":/common.qss");qss.open(QFile::ReadOnly)) {
         app.setStyleSheet(qss.readAll());
         qss.close();
     }

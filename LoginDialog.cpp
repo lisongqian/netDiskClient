@@ -17,7 +17,7 @@ using std::string;
 using std::map;
 
 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui( std::make_shared<Ui::LoginDialog>()) {
+LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()) {
     ui->setupUi(this);
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
 }
@@ -31,13 +31,9 @@ void LoginDialog::slot_login() {
         data["username"] = username;
         data["password"] = password;
         bool flag = login(username, password, true);
-//        if (username == "lisongqian" && password == "123123") {
         if (flag) {
             emit open_main_window();
             this->close();
-        }
-        else {
-            QMessageBox::information(this, "错误", "用户名或密码不正确，请重新输入");
         }
     }
     else {
@@ -50,7 +46,8 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
     string res;
     data["username"] = username;
     data["password"] = password;
-    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
+//    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
+    auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
     req->init();
     bool flag = req->post("/login", data, res);
     req->close_socket();
@@ -61,22 +58,30 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
             assert(document.IsObject());
             assert(document.HasMember("status"));
             assert(document.HasMember("code"));
-            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                extern Config g_config;
-                std::ofstream out(g_config.login_cache_path);
-                if (out.is_open()) {
-                    out << username << std::endl;
-                    out << password << std::endl;
-                    out.close();
-                    return true;
+            if (document["status"].GetInt() == 200) {
+                if (document["code"].GetInt() == 1) {
+                    extern Config g_config;
+                    std::ofstream out(g_config.login_cache_path);
+                    if (out.is_open()) {
+                        out << username << std::endl;
+                        out << password << std::endl;
+                        out.close();
+                        g_config.token = document["token"].GetString();
+                        return true;
+                    }
                 }
-                if (messagebox)
-                    QMessageBox::information(this, "错误", "登录仅本次有效");
-                return true;
-//                return false;
+                if (messagebox) {
+                    if (document.HasMember("msg")) {
+                        QMessageBox::information(this, "错误", document["msg"].GetString());
+
+                    }
+                    else {
+                        QMessageBox::information(this, "错误", "登录仅本次有效");
+                    }
+                }
             }
             else {
-                return false;
+                QMessageBox::information(this, "错误", "网络错误");
             }
         }
         catch (std::exception &e) {

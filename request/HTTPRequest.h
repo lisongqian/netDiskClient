@@ -26,8 +26,8 @@ public:
     ~HTTPRequest();
     bool init();
     bool close_socket();
-    bool get(string url, const map<string,string>& data, string &response);
-    bool post(string url, map<string,string> data, string &response);
+    bool get(const string& url, const map<string,string>& data, string &response) const;
+    bool post(const string& url, const map<string,string>& data, string &response) const;
 private:
     string m_ip;
     int m_port;
