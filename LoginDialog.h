@@ -27,6 +27,8 @@ signals:
 
 private:
     std::shared_ptr<Ui::LoginDialog> ui;
+    string m_ip;
+    unsigned short m_port;
 private slots:
 
     void slot_login();

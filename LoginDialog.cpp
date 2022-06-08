@@ -17,8 +17,11 @@ using std::string;
 using std::map;
 
 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()) {
+LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()), m_ip("127.0.0.1"),
+                                            m_port(23450) {
     ui->setupUi(this);
+//    m_ip = "127.0.0.1";
+//    m_ip = "192.168.229.129";
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
     connect(ui->registerButton, &QPushButton::clicked, this, &LoginDialog::slot_register);
     connect(ui->resetButton, &QPushButton::clicked, this, &LoginDialog::slot_reset);
@@ -45,8 +48,7 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
     string res;
     data["username"] = username;
     data["password"] = password;
-    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
-//    auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
+    auto req = std::make_shared<HTTPRequest>(m_ip.data(), m_port);
     req->init();
     bool flag = req->post("/login", data, res);
     req->close_socket();
@@ -105,7 +107,7 @@ void LoginDialog::slot_register() {
             data["username"] = username;
             data["password1"] = password1;
             data["password2"] = password2;
-            auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
+            auto req = std::make_shared<HTTPRequest>(m_ip, m_port);
             req->init();
             bool flag = req->post("/register", data, res);
             req->close_socket();
