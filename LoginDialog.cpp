@@ -45,8 +45,8 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
     string res;
     data["username"] = username;
     data["password"] = password;
-//    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
-    auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
+    auto req = std::make_shared<HTTPRequest>("127.0.0.1", 23450);
+//    auto req = std::make_shared<HTTPRequest>("192.168.229.129", 23450);
     req->init();
     bool flag = req->post("/login", data, res);
     req->close_socket();

@@ -12,29 +12,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
         this->setStyleSheet(qss.readAll());
         qss.close();
     }
+    ui->statusbar->hide();
+    ui->leftWidget->setAttribute(Qt::WidgetAttribute::WA_StyledBackground);
+    setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    setFixedSize(this->width(), this->height());
+    int icon_size = 25;
+    ui->listWidget->setIconSize(QSize(icon_size, icon_size));
     ui->listWidget->setCurrentRow(0);
     connect(ui->listWidget, &QListWidget::currentRowChanged, this, &MainWindow::changeTab);
 
-    int x = 0;
-    for (int i = 0; i < 3; i++) {
-        if (i) {
-            auto tag = std::make_shared<ClickLabel>(-1, ui->navigation);
-            QIcon icon = QIcon(":/images/caret-right.svg");
-            QPixmap m_pic = icon.pixmap(icon.actualSize(QSize(10, 10)));//size自行调整
-            tag->setPixmap(m_pic);
-            tag->adjustSize();
-            tag->setGeometry(QRect(x, 0, tag->width(), ui->navigation->height()));
-            x += tag->width();
-            m_navigation.push_back(std::move(tag));
-        }
-        auto label = std::make_shared<ClickLabel>(tr(" 文件 "), i, ui->navigation);
-        label->adjustSize();
-        label->setGeometry(QRect(x, 0, label->width(), ui->navigation->height()));
-        x += label->width();
-        connect(label.get(), &ClickLabel::clicked, this, &MainWindow::navigationClick);
-        m_navigation.push_back(std::move(label));
-    }
-    m_navigation[m_navigation.size() - 1]->setStyleSheet("color: #000000;font-size: 20px;");
+    auto label = std::make_shared<ClickLabel>(tr("文件"), 0, ui->navigation);
+    label->adjustSize();
+    label->setGeometry(QRect(0, 0, label->width() + 8, ui->navigation->height()));
+    connect(label.get(), &ClickLabel::clicked, this, &MainWindow::navigationClick);
+    label->setCursor(QCursor(Qt::PointingHandCursor));
+    label->setProperty("level", "last");
+    label->style()->polish(label.get());
+    m_navigation.push_back(std::move(label));
     showFileNavigation();
 }
 
@@ -77,7 +71,8 @@ void MainWindow::navigationClick(int index) {
     while (m_navigation.size() > index * 2 + 1) {
         m_navigation.pop_back();
     }
-    m_navigation[index * 2]->setStyleSheet("color: #000000;font-size: 20px;");
+    m_navigation[index * 2]->setProperty("level", "last");
+    m_navigation[index * 2]->style()->polish(m_navigation[index * 2].get());
 }
 
 /**
@@ -94,4 +89,30 @@ void MainWindow::showFileNavigation(bool isShow) {
             item->hide();
         }
     }
+}
+
+void MainWindow::addNavigation(std::string_view name) {
+    QPoint point = m_navigation[m_navigation.size() - 1]->pos();
+    auto tag = std::make_shared<ClickLabel>(-1, ui->navigation);
+    QIcon icon = QIcon(":/images/caret-right.svg");
+    QPixmap m_pic = icon.pixmap(icon.actualSize(QSize(10, 10)));//size自行调整
+    tag->setPixmap(m_pic);
+    tag->adjustSize();
+    tag->setGeometry(QRect(point.x() + m_navigation[m_navigation.size() - 1]->width(), 0, tag->width(),
+                           ui->navigation->height()));
+    auto label = std::make_shared<ClickLabel>(tr(name.data()), (m_navigation.size() + 1) / 2, ui->navigation);
+    label->adjustSize();
+    label->setGeometry(
+            QRect(point.x() + m_navigation[m_navigation.size() - 1]->width() + tag->width(), 0, label->width() + 8,
+                  ui->navigation->height()));
+    connect(label.get(), &ClickLabel::clicked, this, &MainWindow::navigationClick);
+    label->setCursor(QCursor(Qt::PointingHandCursor));
+
+    m_navigation[m_navigation.size() - 1]->setProperty("level", "normal");
+    m_navigation[m_navigation.size() - 1]->style()->polish(m_navigation[m_navigation.size() - 1].get());
+    label->setProperty("level", "last");
+    label->style()->polish(label.get());
+    m_navigation.push_back(std::move(tag));
+    m_navigation.push_back(std::move(label));
+
 }

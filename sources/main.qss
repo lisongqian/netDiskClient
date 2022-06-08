@@ -6,7 +6,7 @@ QTabWidget::pane
 {
 background-color: #ffffff;
 border-width:1px;
-border-radius: 15px;
+border-radius: 0px;
 }
 
 QTabBar::tab{
@@ -19,21 +19,31 @@ border-radius: 0;
 }
 
 QListWidget{
-border: 1px solid #ffffff;
-border-radius: 5px;
+background-color: #eeeeee;
+border: 0px solid #eeeeee;
 outline: none;
 font-size: 15px;
-font-weight: bold;
+font-weight: normal;
+}
+#leftWidget{
+background-color: #eeeeee;
 }
 QListWidget::Item{
 color: #606266;
-/*margin:0px;*/
-padding: 5px 4px;
-border: 1px solid #ffffff;
+margin: 0px 10px 0px 6px;
+border: 0px solid #eeeeee;
 border-radius: 5px;
+
+padding: 8px 4px;
+
+}
+QListWidget::Item:hover{
+background-color: #e9e9eb;
 }
 QListWidget::Item:selected{
-color: #409EFF;
-background-color: rgba(64, 158, 255, 0.1);
-border-color:rgba(64, 158, 255, 0.1);
+color: #000000;
+background-color: #dedfe0;
+}
+QTableView{
+border: 0px silid #000000;
 }

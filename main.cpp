@@ -7,6 +7,7 @@
 #include <QUuid>
 #include <fstream>
 #include <direct.h>
+#include <QFontDatabase>
 #include "log/log.h"
 #include "common.h"
 #include "config.h"
@@ -40,6 +41,11 @@ int main(int argc, char **argv) {
     //4. 启动窗口
     static MainWindow mainWindow;
     LoginDialog dlg;
+    int localFont = QFontDatabase::addApplicationFont(":/PingFang.ttf");
+    QString PingFangSC = QFontDatabase::applicationFontFamilies(localFont).at(0);
+    cout << PingFangSC.toLocal8Bit().data() << endl;
+    QFont font(PingFangSC, 10);
+    QApplication::setFont(font);
 
     // 5. 登录窗口显示判断，打开主窗口
     if (std::ifstream in(g_config.login_cache_path);in.is_open()) {

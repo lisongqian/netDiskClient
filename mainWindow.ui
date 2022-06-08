@@ -6,45 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>816</width>
-    <height>618</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="palette">
    <palette>
-    <active>
-     <colorrole role="Window">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
-       </color>
-      </brush>
-     </colorrole>
-    </active>
-    <inactive>
-     <colorrole role="Window">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>240</red>
-        <green>240</green>
-        <blue>240</blue>
-       </color>
-      </brush>
-     </colorrole>
-    </inactive>
-    <disabled>
-     <colorrole role="Window">
-      <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>240</red>
-        <green>240</green>
-        <blue>240</blue>
-       </color>
-      </brush>
-     </colorrole>
-    </disabled>
+    <active/>
+    <inactive/>
+    <disabled/>
    </palette>
   </property>
   <property name="windowTitle">
@@ -54,229 +36,247 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" rowspan="2">
-       <widget class="QWidget" name="widget_2" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>550</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <widget class="QLabel" name="label">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>151</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>华文中宋</family>
-           <pointsize>15</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>网盘客户端</string>
-         </property>
-        </widget>
-        <widget class="QListWidget" name="listWidget">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>40</y>
-           <width>151</width>
-           <height>471</height>
-          </rect>
-         </property>
-         <item>
-          <property name="text">
-           <string>文件</string>
-          </property>
-          <property name="icon">
-           <iconset resource="sources/main.qrc">
-            <normaloff>:/images/document.svg</normaloff>
-            <selectedoff>:/images/document-selected.svg</selectedoff>:/images/document.svg</iconset>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>下载列表</string>
-          </property>
-          <property name="icon">
-           <iconset resource="sources/main.qrc">
-            <normaloff>:/images/download.svg</normaloff>
-            <selectedoff>:/images/download-selected.svg</selectedoff>:/images/download.svg</iconset>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>上传进度</string>
-          </property>
-          <property name="icon">
-           <iconset resource="sources/main.qrc">
-            <normaloff>:/images/upload.svg</normaloff>
-            <selectedoff>:/images/upload-selected.svg</selectedoff>:/images/upload.svg</iconset>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>分享记录</string>
-          </property>
-          <property name="icon">
-           <iconset resource="sources/main.qrc">
-            <normaloff>:/images/share.svg</normaloff>
-            <selectedoff>:/images/share-selected.svg</selectedoff>:/images/share.svg</iconset>
-          </property>
-         </item>
-        </widget>
-        <widget class="QProgressBar" name="progressBar">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>540</y>
-           <width>118</width>
-           <height>10</height>
-          </rect>
-         </property>
-         <property name="value">
-          <number>24</number>
-         </property>
-         <property name="textVisible">
-          <bool>false</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::BottomToTop</enum>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>520</y>
-           <width>53</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>24%</string>
-         </property>
-        </widget>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="minimumSize">
-         <size>
-          <width>640</width>
-          <height>520</height>
-         </size>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::TabFocus</enum>
-        </property>
-        <property name="tabPosition">
-         <enum>QTabWidget::North</enum>
-        </property>
-        <property name="currentIndex">
-         <number>1</number>
-        </property>
-        <widget class="QWidget" name="fileTab">
-         <attribute name="title">
-          <string>Tab 1</string>
-         </attribute>
-         <widget class="QTableView" name="fileTableView">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>641</width>
-            <height>501</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="downloadTab">
-         <attribute name="title">
-          <string>Tab 2</string>
-         </attribute>
-         <widget class="QTableWidget" name="tableWidget">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>641</width>
-            <height>331</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="uploadTab">
-         <attribute name="title">
-          <string>页</string>
-         </attribute>
-         <widget class="QTableView" name="tableView">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>641</width>
-            <height>192</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="shareTab">
-         <attribute name="title">
-          <string>页</string>
-         </attribute>
-        </widget>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QWidget" name="navigation" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>640</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
+   <widget class="QWidget" name="leftWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1</x>
+      <y>1</y>
+      <width>160</width>
+      <height>600</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>160</width>
+      <height>600</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>160</width>
+      <height>600</height>
+     </size>
+    </property>
+    <property name="autoFillBackground">
+     <bool>true</bool>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>10</y>
+       <width>150</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>我的网盘</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="listWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>40</y>
+       <width>160</width>
+       <height>470</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>文件</string>
+      </property>
+      <property name="icon">
+       <iconset resource="sources/main.qrc">
+        <normaloff>:/images/document.svg</normaloff>
+        <selectedoff>:/images/document-selected.svg</selectedoff>:/images/document.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>下载列表</string>
+      </property>
+      <property name="icon">
+       <iconset resource="sources/main.qrc">
+        <normaloff>:/images/download.svg</normaloff>
+        <selectedoff>:/images/download-selected.svg</selectedoff>:/images/download.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>上传进度</string>
+      </property>
+      <property name="icon">
+       <iconset resource="sources/main.qrc">
+        <normaloff>:/images/upload.svg</normaloff>
+        <selectedoff>:/images/upload-selected.svg</selectedoff>:/images/upload.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>分享记录</string>
+      </property>
+      <property name="icon">
+       <iconset resource="sources/main.qrc">
+        <normaloff>:/images/share.svg</normaloff>
+        <selectedoff>:/images/share-selected.svg</selectedoff>:/images/share.svg</iconset>
+      </property>
+     </item>
+    </widget>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>540</y>
+       <width>118</width>
+       <height>10</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="textDirection">
+      <enum>QProgressBar::BottomToTop</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>520</y>
+       <width>53</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>24%</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>157</x>
+      <y>1</y>
+      <width>640</width>
+      <height>600</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>640</width>
+      <height>520</height>
+     </size>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::TabFocus</enum>
+    </property>
+    <property name="tabPosition">
+     <enum>QTabWidget::North</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="fileTab">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+     <widget class="QTableView" name="fileTableView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>70</y>
+        <width>661</width>
+        <height>501</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QWidget" name="navigation" native="true">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>641</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>640</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>30</height>
+       </size>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="downloadTab">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>641</width>
+        <height>331</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="uploadTab">
+     <attribute name="title">
+      <string>页</string>
+     </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>641</width>
+        <height>192</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="shareTab">
+     <attribute name="title">
+      <string>页</string>
+     </attribute>
+    </widget>
+   </widget>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>816</width>
-     <height>22</height>
-    </rect>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="sources/main.qrc"/>

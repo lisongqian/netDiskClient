@@ -19,6 +19,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     void addConnection(LoginDialog *dialog) const;
     void showFileNavigation(bool isShow = true);
+    void addNavigation(std::string_view name);
     ~MainWindow() override = default;
 public slots:
     void show_myself();

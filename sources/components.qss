@@ -1,8 +1,15 @@
 ClickLabel{
-color: #909399;
-font-size: 20px;
+color: #B0B1B3;
+font-size: 17px;
+line-height: 17px;
 }
 
-ClickLabel:hover{
+ClickLabel[level='normal']:hover{
 color: #409EFF;
+}
+
+QLabel[level='last'],ClickLabel[level='last'],.lastClickLabel{
+color: #000000;
+font-size: 17px;
+font-weight: bold;
 }

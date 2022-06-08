@@ -19,5 +19,6 @@
         <file>images/download-selected.svg</file>
         <file>images/upload-selected.svg</file>
         <file>images/caret-right.svg</file>
+        <file>PingFang.ttf</file>
     </qresource>
 </RCC>

@@ -3,6 +3,8 @@
 //
 
 #include <QFile>
+#include <QStyleOption>
+#include <QPainter>
 #include "ClickLabel.h"
 #include "log/log.h"
 
@@ -17,10 +19,12 @@ ClickLabel::ClickLabel(const QString &text, int index, QWidget *parent, Qt::Wind
 }
 
 void ClickLabel::init() {
+    setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     if (QFile qss(":/components.qss");qss.open(QFile::ReadOnly)) {
         this->setStyleSheet(qss.readAll());
         qss.close();
     }
+    setProperty("level", "normal");
 }
 
 void ClickLabel::mousePressEvent(QMouseEvent *event) {

@@ -1,4 +1,7 @@
-QMainWindow,QDialog{
+QMainWindow{
+background-color: #ffffff;
+}
+QDialog{
 background-color: #d9ecff;
 }
 QTabWidget::tab-bar
