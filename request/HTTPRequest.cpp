@@ -3,7 +3,8 @@
 //
 
 #include <cstring>
-#include <utility>
+//#include <utility>
+#include <map>
 #include "HTTPRequest.h"
 #include "log/log.h"
 #include "common.h"
@@ -44,24 +45,45 @@ bool HTTPRequest::get(const string &url, const map<string, string> &data, string
     if (!m_open) {
         return false;
     }
-    string send_buff = Map2String(data);
-    const char *sendData;
-    sendData = send_buff.c_str();   //string转const char*
-    send(m_socket, sendData, strlen(sendData), 0);
+    char send_data[100];
+    memset(send_data, '\0', 100);
+    int data_len = 0;
+    for (const auto &it: data) {
+        data_len += snprintf(send_data + data_len, 100 - data_len, "%s=%s&", it.first.c_str(),
+                             it.second.c_str());
+    }
+    send_data[strlen(send_data) - 1] = '\0';
+    char send_buff[2048];
+    memset(send_buff, '\0', 2048);
+    int n = snprintf(send_buff, 2048, "GET\t%s?%s\tHTTP/1.1\r\n", url.c_str(), send_data);
+    snprintf(send_buff + n, 2048 - n, "Connection:keep-alive\r\n");
+//    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len);
+    send(m_socket, send_buff, strlen(send_buff) + 1, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     char recData[2048];
     memset(recData, '\0', 2048);
     int ret = recv(m_socket, recData, 2048, 0);
     if (ret > 0) {
         recData[ret] = 0x00;
-        LOG_INFO(recData)
-        response = recData;
+        string tmp = recData;
+        int pos = tmp.rfind('\n');
+        if (pos > 0) {
+            response = tmp.substr(pos + 1);
+            LOG_INFO("response:%s", response.c_str())
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 
 bool HTTPRequest::post(const string &url, const map<string, string> &data, string &response) const {
+    const map<string, string> headers;
+    return post(url,data,headers,response);
+}
+
+bool HTTPRequest::post(const string &url, const map<string, string> &data, const map<string, string>& header,
+                       string &response) const {
     if (!m_open) {
         return false;
     }
@@ -77,10 +99,13 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, strin
     memset(send_buff, '\0', 2048);
     int n = snprintf(send_buff, 2048, "POST\t%s\tHTTP/1.1\r\n", url.c_str());
     n += snprintf(send_buff + n, 2048 - n, "Connection:keep-alive\r\n");
-    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", data_len);
+    n += snprintf(send_buff + n, 2048 - n, "Content-length:%d\r\n", strlen(send_data));
+    for (auto &item: header) {
+        n += snprintf(send_buff + n, 2048 - n, "%s:%s\r\n", item.first.c_str(), item.second.c_str());
+    }
     snprintf(send_buff + n, 2048 - n, "\r\n%s", send_data);
 //    LOG_INFO("send:%s", send_buff);
-    send(m_socket, send_buff, strlen(send_buff) + 1, 0);
+    send(m_socket, send_buff, strlen(send_buff), 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     char recData[2048];
     memset(recData, '\0', 2048);

@@ -6,14 +6,11 @@
 #define NETDISK_HTTPREQUEST_H
 
 #include <iostream>
-#include <map>
-
 #ifdef UNIX
 #include <pthread.h>
 #else
 
 #include <WinSock2.h>
-
 #pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
 #endif
 
@@ -28,6 +25,7 @@ public:
     bool close_socket();
     bool get(const string& url, const map<string,string>& data, string &response) const;
     bool post(const string& url, const map<string,string>& data, string &response) const;
+    bool post(const string& url, const map<string,string>& data,const map<string,string>& header, string &response) const;
 private:
     string m_ip;
     int m_port;

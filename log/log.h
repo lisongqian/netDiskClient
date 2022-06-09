@@ -6,21 +6,13 @@
 #define NETDISK_LOG_H
 
 #include <iostream>
-
-#ifdef UNIX
-#include <pthread.h>
-#else
-
-#include <windows.h>
-
-#endif
-
 #include <queue>
 #include "common.h"
 #include "../lock/locker.h"
 
 using std::string;
 using std::queue;
+
 
 class Log {
 public:

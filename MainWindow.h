@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QProxyStyle>
 #include <QStylePainter>
+#include <QStandardItemModel>
 #include "ui_mainWindow.h"
 #include "LoginDialog.h"
 #include "components/ClickLabel.h"
@@ -29,6 +30,10 @@ public slots:
 private:
     std::shared_ptr<Ui::MainWindow> ui;
     std::vector<std::shared_ptr<ClickLabel>> m_navigation;
+    std::shared_ptr<QStandardItemModel> m_file_list_model;
+    std::shared_ptr<QStandardItemModel> m_file_share_model;     // TODO 服务器记录
+    std::shared_ptr<QStandardItemModel> m_file_download_model;  // TODO 本地存储记录
+    std::shared_ptr<QStandardItemModel> m_file_upload_model;    // TODO 本地存储记录
 };
 
 

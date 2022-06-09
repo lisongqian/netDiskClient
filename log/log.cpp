@@ -4,10 +4,8 @@
 
 #include <cstring>
 #include <cstdarg>
-#include <ctime>
 #include <sys/time.h>
 #include "log.h"
-#include "../common.h"
 
 Log::~Log() {
     if (m_fp != nullptr) {

@@ -6,10 +6,11 @@
 #ifndef NETDISK_COMMON_H
 #define NETDISK_COMMON_H
 
-#include <string>
 #include <map>
+#include <cstring>
 
 using std::string;
+using std::map;
 
 constexpr std::uint32_t hash_str_to_uint32(const char *data) {  // C++ 14以上支持,11不支持使用局部变量、循环和分支等简单语句
     std::uint32_t h(0);
@@ -18,26 +19,42 @@ constexpr std::uint32_t hash_str_to_uint32(const char *data) {  // C++ 14以上�
     return h;
 }
 
-static string Map2String(const std::map<string, string> &m) {
-    string result = "{";
-    char tmp[1024];
-    memset(tmp, '\0', sizeof(tmp));
-    for (auto &item: m) {
-        snprintf(tmp, sizeof(tmp) - 1, "%s:'%s',", item.first.c_str(), item.second.c_str());
-        result += tmp;
-        memset(tmp, '\0', sizeof(tmp));
+static string file_size_display(double size) {
+    char str[10];
+    memset(str, '\0', sizeof(str));
+    int count = 0;
+    while (size > 1024 && count < 5) {
+        size = (size * 1.0) / 1024;
+        count++;
     }
-    result[result.length() - 1] = '}';
+    snprintf(str, 10, "%.1f", size);
+    string result = str;
+    switch (count) {
+        case 0:
+            result += "B";
+            break;
+        case 1:
+            result += "KB";
+            break;
+        case 2:
+            result += "MB";
+            break;
+        case 3:
+            result += "GB";
+            break;
+        case 4:
+            result += "TB";
+            break;
+        case 5:
+            result += "PB";
+            break;
+        default:
+            break;
+    }
     return result;
 }
 
-static std::map<string, string> string_to_map(const string str) {
-    std::map<string, string> m;
-
-    return m;
-}
-
-enum class alertLevel: unsigned int {
+enum class alertLevel : unsigned int {
     E_DEBUG = 0,
     E_INFO,
     E_WARN,

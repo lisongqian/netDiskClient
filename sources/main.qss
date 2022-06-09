@@ -1,49 +1,54 @@
 QTabWidget::tab-bar
 {
-left:0px;
+    left:0px;
 }
 QTabWidget::pane
 {
-background-color: #ffffff;
-border-width:1px;
-border-radius: 0px;
+    background-color: #ffffff;
+    border-width:1px;
+    border-radius: 0px;
 }
 
 QTabBar::tab{
-width: 0px;
-height:0px;
-font:18px;
-background-color: #ffffff;
-border-width:0px;
-border-radius: 0;
+    width: 0px;
+    height:0px;
+    font:18px;
+    background-color: #ffffff;
+    border-width:0px;
+    border-radius: 0;
 }
 
 QListWidget{
-background-color: #eeeeee;
-border: 0px solid #eeeeee;
-outline: none;
-font-size: 15px;
-font-weight: normal;
+    background-color: #eeeeee;
+    border: 0px solid #eeeeee;
+    outline: none;
+    font-size: 15px;
+    font-weight: normal;
 }
 #leftWidget{
-background-color: #eeeeee;
+    background-color: #eeeeee;
 }
 QListWidget::Item{
-color: #606266;
-margin: 0px 10px 0px 6px;
-border: 0px solid #eeeeee;
-border-radius: 5px;
-
-padding: 8px 4px;
+    color: #606266;
+    margin: 0px 10px 0px 6px;
+    border: 0px solid #eeeeee;
+    border-radius: 5px;
+    padding: 8px 4px;
 
 }
 QListWidget::Item:hover{
-background-color: #e9e9eb;
+    background-color: #e9e9eb;
 }
 QListWidget::Item:selected{
-color: #000000;
-background-color: #dedfe0;
+    color: #000000;
+    background-color: #dedfe0;
 }
 QTableView{
-border: 0px silid #000000;
+    border: 0px silid #000000;
+    outline: none;
+    padding: 0px 1px;
+}
+QTableView::item:selected {
+    background-color: #eeeeee;
+    color: #000000;
 }
