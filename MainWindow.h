@@ -23,8 +23,9 @@ public:
     ~MainWindow() override = default;
 public slots:
     void show_myself();
-    void changeTab(int currentRow );
+    void changeTab(int currentRow);
     void navigationClick(int index);
+    void updateFileList();
 private:
     std::shared_ptr<Ui::MainWindow> ui;
     std::vector<std::shared_ptr<ClickLabel>> m_navigation;

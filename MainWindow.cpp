@@ -5,6 +5,10 @@
 #include <QFile>
 #include "MainWindow.h"
 #include "log/log.h"
+#include "request/HTTPRequest.h"
+#include "config.h"
+
+extern Config g_config;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shared<Ui::MainWindow>()) {
     ui->setupUi(this);
@@ -115,4 +119,14 @@ void MainWindow::addNavigation(std::string_view name) {
     m_navigation.push_back(std::move(tag));
     m_navigation.push_back(std::move(label));
 
+}
+
+void MainWindow::updateFileList() {
+    string res;
+    map<string, string> data;
+    data["dir"] = "0";
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    bool flag = req->post("/filelist", data, res);
+    req->close_socket();
 }

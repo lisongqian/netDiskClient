@@ -27,6 +27,9 @@ bool HTTPRequest::init() {
     serAddr.sin_family = AF_INET;
     serAddr.sin_port = htons(m_port);
     serAddr.sin_addr.S_un.S_addr = inet_addr(m_ip.c_str());
+    int timeout = 3000; //3s
+    setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (char *) &timeout, sizeof(timeout));
+    setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(timeout));
     if (connect(m_socket, (sockaddr *) &serAddr, sizeof(serAddr)) == SOCKET_ERROR) {  //连接失败
         m_open = false;
         LOG_ERROR("connect error !");

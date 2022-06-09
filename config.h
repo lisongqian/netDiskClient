@@ -13,8 +13,8 @@ using std::string;
 
 class Config {
 public:
-    Config() : port(23450), buff_size(2048), database_connect_num(8), login_cache_path("./tmp/login.cache"),token("") {}
-
+    Config() : port(23450), buff_size(2048),  login_cache_path("./tmp/login.cache"),token(""),ip("127.0.0.1") {}
+//    ip = "192.168.229.129";
     void ParseArg(int argc, char *argv[]) {
         int opt;
         const char *str = "p:b:d:";
@@ -28,9 +28,7 @@ public:
                     buff_size = atoi(optarg);
                     break;
                 }
-                case 'd': {
-                    database_connect_num = atoi(optarg);
-                }
+
                 default: {
                     break;
                 }
@@ -40,9 +38,9 @@ public:
 
     int port;
     int buff_size;
-    int database_connect_num;
     string login_cache_path;
     string token;
+    string ip;
 };
 
 #endif //NETDISK_CONFIG_H

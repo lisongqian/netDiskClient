@@ -15,13 +15,11 @@
 using namespace rapidjson;
 using std::string;
 using std::map;
+extern Config g_config;
 
 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()), m_ip("127.0.0.1"),
-                                            m_port(23450) {
+LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()) {
     ui->setupUi(this);
-//    m_ip = "127.0.0.1";
-//    m_ip = "192.168.229.129";
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
     connect(ui->registerButton, &QPushButton::clicked, this, &LoginDialog::slot_register);
     connect(ui->resetButton, &QPushButton::clicked, this, &LoginDialog::slot_reset);
@@ -48,7 +46,7 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
     string res;
     data["username"] = username;
     data["password"] = password;
-    auto req = std::make_shared<HTTPRequest>(m_ip.data(), m_port);
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
     req->init();
     bool flag = req->post("/login", data, res);
     req->close_socket();
@@ -61,7 +59,6 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
             assert(document.HasMember("code"));
             if (document["status"].GetInt() == 200) {
                 if (document["code"].GetInt() == 1) {
-                    extern Config g_config;
                     std::ofstream out(g_config.login_cache_path);
                     if (out.is_open()) {
                         out << username << std::endl;
@@ -107,7 +104,7 @@ void LoginDialog::slot_register() {
             data["username"] = username;
             data["password1"] = password1;
             data["password2"] = password2;
-            auto req = std::make_shared<HTTPRequest>(m_ip, m_port);
+            auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
             req->init();
             bool flag = req->post("/register", data, res);
             req->close_socket();
