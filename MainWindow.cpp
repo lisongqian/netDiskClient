@@ -3,6 +3,11 @@
 //
 
 #include <QFile>
+#include <QDragEnterEvent>
+//#include <QDropEvent>
+#include <QMimeData>
+#include <QCryptographicHash>
+//#include <QDrag>
 #include "MainWindow.h"
 #include "request/HTTPRequest.h"    // winsock2.h 要在windows.h 前 locker.h中引用了windows.h
 #include "log/log.h"
@@ -22,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     ui->statusbar->hide();
     setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
     setFixedSize(this->width(), this->height());
+    setAcceptDrops(true);
 
     /*左侧栏设置*/
     ui->leftWidget->setAttribute(Qt::WidgetAttribute::WA_StyledBackground);
@@ -215,4 +221,99 @@ void MainWindow::updateFileList() {
         }
     }
     req->close_socket();
+}
+
+void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
+    string res;
+    map<string, string> headers;
+    headers["Token"] = g_config.token;
+    headers["Content-Type"] = "multipart/form-data; boundary=--boundary_yitiaohunxiaozifuchuanchuan";
+    string mix_str = "------boundary_yitiaohunxiaozifuchuanchuan";
+    map<string, string> data;
+
+    string send_file_info, file_data;
+
+    for (auto &item: files) {
+        QFile localFile(item->filePath());
+        send_file_info = mix_str + "\r\n";
+        send_file_info += "Content-Disposition: form-data;";
+        send_file_info += " name=\"" + item->fileName().toStdString() + "\";";
+        if (!localFile.open(QFile::ReadOnly)) {
+            LOG_ERROR("%s open error.", item->fileName().toStdString().c_str());
+            continue;
+        }
+        QCryptographicHash ch(QCryptographicHash::Sha1);
+
+        quint64 totalBytes = localFile.size();
+        quint64 bytesWritten = 0;
+        quint64 bytesToWrite = totalBytes;
+        quint64 loadSize = 1024 * 4;
+        QByteArray buf;
+
+        while (true) {
+            if (bytesToWrite > 0) {
+                buf = localFile.read(qMin(bytesToWrite, loadSize));
+                file_data += buf.data();
+                ch.addData(buf);
+                bytesWritten += buf.length();
+                bytesToWrite -= buf.length();
+                buf.resize(0);
+            }
+            else {
+                break;
+            }
+            if (bytesWritten == totalBytes) {
+                break;
+            }
+        }
+        localFile.close();
+        auto sha1 = ch.result();
+        send_file_info += " filename=\"" + sha1.toHex().toStdString() + "\"\r\n\r\n";
+        send_file_info += file_data + "\r\n";
+        file_data.clear();
+    }
+    send_file_info += mix_str + "--";
+//    LOG_INFO("%s", send_file_info.c_str());
+    data["data"] = send_file_info;
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    bool flag = req->post("/upload", data, headers, res);
+    if (flag) {
+    }
+    req->close_socket();
+}
+
+void MainWindow::downloadFile() {
+    string res;
+    map<string, string> headers;
+    headers["Token"] = g_config.token;
+    map<string, string> data;
+    data["filename"] = "0";
+    data["id"] = "0";
+    data["hash"] = "0";
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    bool flag = req->post("/download", data, headers, res);
+    if (flag) {
+
+    }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+//    if (event->mimeData()->hasUrls())
+    if (event->mimeData()->hasFormat("text/uri-list"))
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+    QList<QUrl> urls = event->mimeData()->urls();
+    std::vector<std::shared_ptr<QFileInfo>> files;
+    QString suffixs = "sh exe bat";
+
+    for (const QUrl &url: urls) {
+        auto file = std::make_shared<QFileInfo>(url.toLocalFile());    //toLocalFile可以获取文件路径，而非QUrl的file://开头的路径
+        if (file->isFile() && !suffixs.contains(file->suffix())) //过滤掉目录和不支持的后缀，如果要支持目录，则要自己遍历每一个目录。
+            files.push_back(file);
+    }
+    uploadFile(files);
 }

@@ -10,6 +10,7 @@ color: #409EFF;
 
 QLabel[level='last'],ClickLabel[level='last'],.lastClickLabel{
 color: #000000;
+font-family: 'PingFang SC';
 font-size: 17px;
 font-weight: bold;
 }

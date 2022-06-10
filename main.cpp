@@ -31,8 +31,14 @@ int main(int argc, char **argv) {
     Log::instance()->Init(g_config.buff_size);
 
     //3. 加载编码格式和样式表
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QApplication app(argc, argv);
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");//或者"GBK",不分大小写
+    QTextCodec::setCodecForLocale(codec);
+    int localFont = QFontDatabase::addApplicationFont(":/PingFang.ttf");
+    QString PingFangSC = QFontDatabase::applicationFontFamilies(localFont).at(0);
+    cout << PingFangSC.toLocal8Bit().data() << endl;
+    QFont font(PingFangSC, 10);
+    QApplication::setFont(font);
     if (QFile qss(":/common.qss");qss.open(QFile::ReadOnly)) {
         app.setStyleSheet(qss.readAll());
         qss.close();
@@ -41,11 +47,6 @@ int main(int argc, char **argv) {
     //4. 启动窗口
     static MainWindow mainWindow;
     LoginDialog dlg;
-    int localFont = QFontDatabase::addApplicationFont(":/PingFang.ttf");
-    QString PingFangSC = QFontDatabase::applicationFontFamilies(localFont).at(0);
-    cout << PingFangSC.toLocal8Bit().data() << endl;
-    QFont font(PingFangSC, 10);
-    QApplication::setFont(font);
 
     // 5. 登录窗口显示判断，打开主窗口
     if (std::ifstream in(g_config.login_cache_path);in.is_open()) {
