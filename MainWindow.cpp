@@ -17,7 +17,7 @@
 using namespace rapidjson;
 extern Config g_config;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shared<Ui::MainWindow>()) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shared<Ui::MainWindow>()), m_current_dir(0) {
     ui->setupUi(this);
     if (QFile qss(":/main.qss");qss.open(QFile::ReadOnly)) {
         this->setStyleSheet(qss.readAll());
@@ -195,6 +195,7 @@ void MainWindow::updateFileList() {
             if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
                 Value &list = document["data"];
                 if (list.IsArray()) {
+                    m_file_list_model->removeRows(0, m_file_list_model->rowCount());
                     for (int i = 0; i < list.Size(); ++i) {
                         Value &item = list[i];
                         if (item.IsObject()) {
@@ -212,6 +213,9 @@ void MainWindow::updateFileList() {
                             m_file_list_model->setItem(i, 4, new QStandardItem(item["addr"].GetString()));
                             m_file_list_model->setItem(i, 5, new QStandardItem(item["hash"].GetString()));
                             m_file_list_model->setItem(i, 6, new QStandardItem(item["type"].GetString()));
+                            if (!i) {// i==0
+                                m_current_dir = item["parent"].GetInt();
+                            }
                         }
                     }
                 }
@@ -237,12 +241,13 @@ void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
         QFile localFile(item->filePath());
         send_file_info = mix_str + "\r\n";
         send_file_info += "Content-Disposition: form-data;";
+        send_file_info += " parent=\"" + std::to_string(m_current_dir) + "\";";
         send_file_info += " name=\"" + item->fileName().toStdString() + "\";";
         if (!localFile.open(QFile::ReadOnly)) {
             LOG_ERROR("%s open error.", item->fileName().toStdString().c_str());
             continue;
         }
-        QCryptographicHash ch(QCryptographicHash::Sha1);
+        QCryptographicHash ch(QCryptographicHash::Md5);
 
         quint64 totalBytes = localFile.size();
         quint64 bytesWritten = 0;
@@ -279,6 +284,7 @@ void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
     req->init();
     bool flag = req->post("/upload", data, headers, res);
     if (flag) {
+        LOG_INFO("%s", res.c_str());
     }
     req->close_socket();
 }

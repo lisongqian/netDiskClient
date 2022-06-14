@@ -38,7 +38,7 @@ public slots:
 
     void updateFileList();
 
-    static void uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files);
+    void uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files);
 
     void downloadFile();
 
@@ -54,6 +54,7 @@ private:
     std::shared_ptr<QStandardItemModel> m_file_share_model;     // TODO 服务器记录
     std::shared_ptr<QStandardItemModel> m_file_download_model;  // TODO 本地存储记录
     std::shared_ptr<QStandardItemModel> m_file_upload_model;    // TODO 本地存储记录
+    int m_current_dir;
 };
 
 
