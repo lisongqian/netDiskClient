@@ -7,6 +7,9 @@
 //#include <QDropEvent>
 #include <QMimeData>
 #include <QCryptographicHash>
+#include <QMessageBox>
+#include <QMenu>
+#include <QFileDialog>
 //#include <QDrag>
 #include "MainWindow.h"
 #include "request/HTTPRequest.h"    // winsock2.h 要在windows.h 前 locker.h中引用了windows.h
@@ -17,7 +20,8 @@
 using namespace rapidjson;
 extern Config g_config;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shared<Ui::MainWindow>()), m_current_dir(0) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shared<Ui::MainWindow>()),
+                                          m_current_dir(0) {
     ui->setupUi(this);
     if (QFile qss(":/main.qss");qss.open(QFile::ReadOnly)) {
         this->setStyleSheet(qss.readAll());
@@ -48,6 +52,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     m_navigation.push_back(std::move(label));
     showFileNavigation();
 
+    /*右键菜单设置*/
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::slot_customContextMenu);
+
+
     /*设置表格属性*/
     m_file_list_model = std::make_shared<QStandardItemModel>();
     m_file_list_model->setColumnCount(7);
@@ -76,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
 /**
  * 显示窗口
  */
-void MainWindow::show_myself() {
+void MainWindow::slot_show_myself() {
     updateFileList();
     this->show();
 }
@@ -86,7 +95,7 @@ void MainWindow::show_myself() {
  * @param dialog
  */
 void MainWindow::addConnection(LoginDialog *dialog) const {
-    connect(dialog, &LoginDialog::open_main_window, this, &MainWindow::show_myself);
+    connect(dialog, &LoginDialog::open_main_window, this, &MainWindow::slot_show_myself);
 }
 
 /**
@@ -99,7 +108,7 @@ void MainWindow::changeTab(int currentRow) {
         ui->tabWidget->setCurrentIndex(currentRow);
         switch (currentRow) {
             case 0: {
-                updateFileList();
+//                updateFileList();
                 break;
             }
             case 1: {
@@ -181,44 +190,47 @@ void MainWindow::updateFileList() {
     map<string, string> headers;
     headers["Token"] = g_config.token;
     map<string, string> data;
-    data["dir"] = "0";
+    data["dir"] = std::to_string(m_current_dir);
     auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
     req->init();
     bool flag = req->post("/filelist", data, headers, res);
     if (flag) {
         try {
+//            LOG_INFO("res:%s", res.c_str());
             Document document;
             document.Parse(res.c_str());
-            assert(document.IsObject());
-            assert(document.HasMember("status"));
-            assert(document.HasMember("code"));
-            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                Value &list = document["data"];
-                if (list.IsArray()) {
-                    m_file_list_model->removeRows(0, m_file_list_model->rowCount());
-                    for (int i = 0; i < list.Size(); ++i) {
-                        Value &item = list[i];
-                        if (item.IsObject()) {
-                            m_file_list_model->setItem(i, 0, new QStandardItem(item["name"].GetString()));
-                            m_file_list_model->setItem(i, 1, new QStandardItem(item["time"].GetString()));
-                            if (strcmp(item["type"].GetString(), "0") == 0) {
-                                m_file_list_model->setItem(i, 2, new QStandardItem("目录"));
-                                m_file_list_model->setItem(i, 3, new QStandardItem("-"));
-                            }
-                            else {
-                                m_file_list_model->setItem(i, 2, new QStandardItem("文件"));
-                                m_file_list_model->setItem(i, 3, new QStandardItem(
-                                        file_size_display(strtod(item["size"].GetString(), nullptr)).data()));
-                            }
-                            m_file_list_model->setItem(i, 4, new QStandardItem(item["addr"].GetString()));
-                            m_file_list_model->setItem(i, 5, new QStandardItem(item["hash"].GetString()));
-                            m_file_list_model->setItem(i, 6, new QStandardItem(item["type"].GetString()));
-                            if (!i) {// i==0
-                                m_current_dir = item["parent"].GetInt();
+            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                    Value &list = document["data"];
+                    if (list.IsArray()) {
+                        m_file_list_model->removeRows(0, m_file_list_model->rowCount());
+                        for (int i = 0; i < list.Size(); ++i) {
+                            Value &item = list[i];
+                            if (item.IsObject()) {
+                                m_file_list_model->setItem(i, 0, new QStandardItem(item["name"].GetString()));
+                                m_file_list_model->setItem(i, 1, new QStandardItem(item["time"].GetString()));
+                                if (strcmp(item["type"].GetString(), "0") == 0) {
+                                    m_file_list_model->setItem(i, 2, new QStandardItem("目录"));
+                                    m_file_list_model->setItem(i, 3, new QStandardItem("-"));
+                                }
+                                else {
+                                    m_file_list_model->setItem(i, 2, new QStandardItem("文件"));
+                                    m_file_list_model->setItem(i, 3, new QStandardItem(
+                                            file_size_display(strtod(item["size"].GetString(), nullptr)).data()));
+                                }
+                                m_file_list_model->setItem(i, 4, new QStandardItem(item["addr"].GetString()));
+                                m_file_list_model->setItem(i, 5, new QStandardItem(item["hash"].GetString()));
+                                m_file_list_model->setItem(i, 6, new QStandardItem(item["type"].GetString()));
+                                if (!i) {// i==0
+                                    m_current_dir = item["parent"].GetInt();
+                                }
                             }
                         }
                     }
                 }
+            }
+            else {
+                QMessageBox::information(this, "错误", "请重试");
             }
         }
         catch (std::exception &e) {
@@ -232,59 +244,27 @@ void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
     map<string, string> headers;
     headers["Token"] = g_config.token;
     headers["Content-Type"] = "multipart/form-data; boundary=--boundary_yitiaohunxiaozifuchuanchuan";
-    string mix_str = "------boundary_yitiaohunxiaozifuchuanchuan";
-    map<string, string> data;
-
-    string send_file_info, file_data;
-
-    for (auto &item: files) {
-        QFile localFile(item->filePath());
-        send_file_info = mix_str + "\r\n";
-        send_file_info += "Content-Disposition: form-data;";
-        send_file_info += " parent=\"" + std::to_string(m_current_dir) + "\";";
-        send_file_info += " name=\"" + item->fileName().toStdString() + "\";";
-        if (!localFile.open(QFile::ReadOnly)) {
-            LOG_ERROR("%s open error.", item->fileName().toStdString().c_str());
-            continue;
-        }
-        QCryptographicHash ch(QCryptographicHash::Md5);
-
-        quint64 totalBytes = localFile.size();
-        quint64 bytesWritten = 0;
-        quint64 bytesToWrite = totalBytes;
-        quint64 loadSize = 1024 * 4;
-        QByteArray buf;
-
-        while (true) {
-            if (bytesToWrite > 0) {
-                buf = localFile.read(qMin(bytesToWrite, loadSize));
-                file_data += buf.data();
-                ch.addData(buf);
-                bytesWritten += buf.length();
-                bytesToWrite -= buf.length();
-                buf.resize(0);
-            }
-            else {
-                break;
-            }
-            if (bytesWritten == totalBytes) {
-                break;
-            }
-        }
-        localFile.close();
-        auto sha1 = ch.result();
-        send_file_info += " filename=\"" + sha1.toHex().toStdString() + "\"\r\n\r\n";
-        send_file_info += file_data + "\r\n";
-        file_data.clear();
-    }
-    send_file_info += mix_str + "--";
-//    LOG_INFO("%s", send_file_info.c_str());
-    data["data"] = send_file_info;
     auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
     req->init();
-    bool flag = req->post("/upload", data, headers, res);
+    bool flag = req->sendFile("/upload", files, m_current_dir, headers, res);
     if (flag) {
         LOG_INFO("%s", res.c_str());
+        Document document;
+        document.Parse(res.c_str());
+        if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                QMessageBox::information(this, "信息", "上传成功!");
+                updateFileList();
+            }
+            else {
+                QMessageBox::information(this, "信息", document["msg"].GetString());
+
+            }
+        }
+        else {
+            QMessageBox::information(this, "错误", "请重试");
+        }
+
     }
     req->close_socket();
 }
@@ -322,4 +302,45 @@ void MainWindow::dropEvent(QDropEvent *event) {
             files.push_back(file);
     }
     uploadFile(files);
+}
+
+void MainWindow::slot_customContextMenu(const QPoint &pos) {
+    switch (ui->tabWidget->currentIndex()) {
+        case 0: {
+            // 参数 pos 是鼠标按下的位置, 但是不能直接使用, 这个坐标不是屏幕坐标, 是当前窗口的坐标
+            // 如果要使用这个坐标需要将其转换为屏幕坐标
+            QMenu menu;
+            QAction *act = menu.addAction("上传文件");
+            connect(act, &QAction::triggered, this, [=]() {
+                QString fileName = QFileDialog::getOpenFileName(
+                        this,
+                        tr("打开文件"),
+                        "D:/Downloads",
+                        tr("所有文件(*.*)"));
+                if (fileName.isEmpty()) {
+//                    QMessageBox::warning(this, "Warning!", "Failed to open the video!");
+                    return ;
+                }
+                LOG_INFO("%s", fileName.toStdString().c_str());
+                std::vector<std::shared_ptr<QFileInfo>> files;
+                auto file = std::make_shared<QFileInfo>(
+                        fileName.toStdString().c_str());    //toLocalFile可以获取文件路径，而非QUrl的file://开头的路径
+                files.push_back(file);
+                uploadFile(files);
+            });
+            act = menu.addAction("新建文件夹");
+            menu.addSeparator();
+            act = menu.addAction("删除文件");
+            menu.addSeparator();
+            act = menu.addAction("刷新");
+            connect(act, &QAction::triggered, this, &MainWindow::updateFileList);
+            // menu.exec(QCursor::pos());
+            // 将窗口坐标转换为屏幕坐标
+            QPoint newpt = this->mapToGlobal(pos);
+            menu.exec(newpt);
+
+        }
+        default:
+            break;
+    }
 }

@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
         LOG_INFO("%s,%s", username.c_str(), password.c_str())
         bool flag = dlg.login(username, password);
         if (flag) {
-            mainWindow.show_myself();
+            mainWindow.slot_show_myself();
         }
         else {
             mainWindow.addConnection(&dlg);

@@ -54,32 +54,36 @@ bool LoginDialog::login(const string &username, const string &password, bool mes
         try {
             Document document;
             document.Parse(res.c_str());
-            assert(document.IsObject());
-            assert(document.HasMember("status"));
-            assert(document.HasMember("code"));
-            if (document["status"].GetInt() == 200) {
-                if (document["code"].GetInt() == 1) {
-                    std::ofstream out(g_config.login_cache_path);
-                    if (out.is_open()) {
-                        out << username << std::endl;
-                        out << password << std::endl;
-                        out.close();
-                        g_config.token = document["token"].GetString();
-                        return true;
+//            LOG_INFO("login response:%s", res.c_str());
+            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                if (document["status"].GetInt() == 200) {
+                    if (document["code"].GetInt() == 1) {
+                        std::ofstream out(g_config.login_cache_path);
+                        if (out.is_open()) {
+                            out << username << std::endl;
+                            out << password << std::endl;
+                            out.close();
+                            g_config.token = document["token"].GetString();
+                            return true;
+                        }
+                    }
+                    if (messagebox) {
+                        if (document.HasMember("msg")) {
+                            QMessageBox::information(this, "错误", document["msg"].GetString());
+
+                        }
+                        else {
+                            QMessageBox::information(this, "错误", "登录仅本次有效");
+                        }
                     }
                 }
-                if (messagebox) {
-                    if (document.HasMember("msg")) {
-                        QMessageBox::information(this, "错误", document["msg"].GetString());
-
-                    }
-                    else {
-                        QMessageBox::information(this, "错误", "登录仅本次有效");
-                    }
+                else {
+                    QMessageBox::information(this, "错误", "服务器错误");
                 }
             }
             else {
                 QMessageBox::information(this, "错误", "网络错误");
+
             }
         }
         catch (std::exception &e) {

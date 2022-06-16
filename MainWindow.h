@@ -30,7 +30,7 @@ public:
 
 public slots:
 
-    void show_myself();
+    void slot_show_myself();
 
     void changeTab(int currentRow);
 
@@ -41,6 +41,8 @@ public slots:
     void uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files);
 
     void downloadFile();
+
+    void slot_customContextMenu(const QPoint &pos);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

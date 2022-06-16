@@ -72,3 +72,11 @@ target_link_libraries(netDisk PRIVATE
         Qt6::Core5Compat
         Qt6::Quick
         )
+
+target_link_libraries(test PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
+        Qt6::Core5Compat
+        Qt6::Quick
+        )
