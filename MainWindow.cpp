@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     m_file_list_model->setHeaderData(1, Qt::Horizontal, "修改时间");
     m_file_list_model->setHeaderData(2, Qt::Horizontal, "类型");
     m_file_list_model->setHeaderData(3, Qt::Horizontal, "文件大小");
-    m_file_list_model->setHeaderData(4, Qt::Horizontal, "路径");
+    m_file_list_model->setHeaderData(4, Qt::Horizontal, "id");
     m_file_list_model->setHeaderData(5, Qt::Horizontal, "哈希值");
     m_file_list_model->setHeaderData(6, Qt::Horizontal, "类型值");
     ui->fileTableView->setModel(m_file_list_model.get());
@@ -218,7 +218,7 @@ void MainWindow::updateFileList() {
                                     m_file_list_model->setItem(i, 3, new QStandardItem(
                                             file_size_display(strtod(item["size"].GetString(), nullptr)).data()));
                                 }
-                                m_file_list_model->setItem(i, 4, new QStandardItem(item["addr"].GetString()));
+                                m_file_list_model->setItem(i, 4, new QStandardItem(item["id"].GetString()));
                                 m_file_list_model->setItem(i, 5, new QStandardItem(item["hash"].GetString()));
                                 m_file_list_model->setItem(i, 6, new QStandardItem(item["type"].GetString()));
                                 if (!i) {// i==0
@@ -292,7 +292,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void MainWindow::dropEvent(QDropEvent *event) {
-    QList<QUrl> urls = event->mimeData()->urls();
+    QList <QUrl> urls = event->mimeData()->urls();
     std::vector<std::shared_ptr<QFileInfo>> files;
     QString suffixs = "sh exe bat";
 
@@ -319,7 +319,7 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
                         tr("所有文件(*.*)"));
                 if (fileName.isEmpty()) {
 //                    QMessageBox::warning(this, "Warning!", "Failed to open the video!");
-                    return ;
+                    return;
                 }
                 LOG_INFO("%s", fileName.toStdString().c_str());
                 std::vector<std::shared_ptr<QFileInfo>> files;
@@ -331,6 +331,36 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
             act = menu.addAction("新建文件夹");
             menu.addSeparator();
             act = menu.addAction("删除文件");
+            connect(act, &QAction::triggered, this, [=]() {
+                map<string, string> headers;
+                headers["Token"] = g_config.token;
+                int row = ui->fileTableView->currentIndex().row();
+                QModelIndex id_index = m_file_list_model->index(row, 4);
+                QModelIndex type_index = m_file_list_model->index(row, 6);
+                map<string, string> data;
+                data["id"] = m_file_list_model->data(id_index).toString().toStdString();
+                data["type"] = m_file_list_model->data(type_index).toString().toStdString();
+                string res;
+                auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+                req->init();
+                bool flag = req->post("/deletefile", data, headers,res);
+                if (flag) {
+                    Document document;
+                    document.Parse(res.c_str());
+                    if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                        if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                            updateFileList();
+                        }
+                        else {
+                            QMessageBox::information(this, "错误", document["msg"].GetString());
+                        }
+                    }
+                    else {
+                        QMessageBox::information(this, "错误", "请重试");
+                    }
+                }
+                req->close_socket();
+            });
             menu.addSeparator();
             act = menu.addAction("刷新");
             connect(act, &QAction::triggered, this, &MainWindow::updateFileList);
