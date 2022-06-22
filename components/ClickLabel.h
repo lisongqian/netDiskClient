@@ -17,8 +17,8 @@ public:
                         Qt::WindowFlags f = Qt::WindowFlags());
 
     void init();
-
     ~ClickLabel() override = default;
+    int m_dir_id;
 
 signals:
 

@@ -9,12 +9,13 @@
 #include "log/log.h"
 
 
-ClickLabel::ClickLabel(int index, QWidget *parent) : QLabel(parent), m_index(index) {
+ClickLabel::ClickLabel(int index, QWidget *parent) : QLabel(parent), m_index(index), m_dir_id(0) {
     init();
 }
 
 ClickLabel::ClickLabel(const QString &text, int index, QWidget *parent, Qt::WindowFlags f) : QLabel(text, parent, f),
-                                                                                             m_index(index) {
+                                                                                             m_index(index),
+                                                                                             m_dir_id(0) {
     init();
 }
 

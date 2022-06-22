@@ -7,6 +7,10 @@
 #include <sys/time.h>
 #include "log.h"
 
+#ifndef LOG_LEVEL
+#define LOG_LEVEL alertLevel::E_INFO
+#endif
+
 Log::~Log() {
     if (m_fp != nullptr) {
         fflush(m_fp);
@@ -41,7 +45,9 @@ bool Log::Init(int log_buff_size) {
 }
 
 void Log::WriteLogToQueue(alertLevel level, const char *format, ...) {
-
+    if (level > LOG_LEVEL) {
+        return ;
+    }
     char s[16] = {0};
     switch (level) {
         case alertLevel::E_DEBUG: {

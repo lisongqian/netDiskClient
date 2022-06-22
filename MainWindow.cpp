@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QFileDialog>
+#include <utility>
 //#include <QDrag>
 #include "MainWindow.h"
 #include "request/HTTPRequest.h"    // winsock2.h 要在windows.h 前 locker.h中引用了windows.h
@@ -53,8 +54,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     showFileNavigation();
 
     /*右键菜单设置*/
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::slot_customContextMenu);
+    ui->fileTableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->fileTableView, &QAbstractItemView::customContextMenuRequested, this,
+            &MainWindow::slot_customContextMenu);
 
 
     /*设置表格属性*/
@@ -80,13 +82,41 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     ui->fileTableView->setColumnHidden(6, true);
     ui->fileTableView->setSelectionBehavior(QTableView::SelectRows);
     ui->fileTableView->setSelectionMode(QTableView::SingleSelection);
+
+    /*重命名功能*/
+    connect(m_file_list_model.get(), &QAbstractItemModel::dataChanged, this,
+            [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+                if (topLeft == bottomRight) {
+                    if (topLeft.column() == 0) {
+                        if (ui->fileTableView->isPersistentEditorOpen(topLeft)) {
+                            ui->fileTableView->closePersistentEditor(topLeft);
+                            QVariant v = m_file_list_model->data(topLeft);
+                            rename(m_file_list_model->data(m_file_list_model->index(topLeft.row(), 6)).toInt(),
+                                   m_file_list_model->data(m_file_list_model->index(topLeft.row(), 4)).toInt(),
+                                   v.toString().toStdString());
+                        }
+                    }
+                }
+            });
+
+    /*表格双击功能*/
+    connect(ui->fileTableView, &QAbstractItemView::doubleClicked, this, [=](const QModelIndex &index) {
+        QVariant v = m_file_list_model->data(m_file_list_model->index(index.row(), 6));
+        if (v.toString().toStdString() == "0") {
+            m_current_dir = m_file_list_model->data(m_file_list_model->index(index.row(), 4)).toInt();
+            addNavigation(m_file_list_model->data(m_file_list_model->index(index.row(), 0)).toString().toStdString(),
+                          m_current_dir);
+            slot_updateFileList();
+        }
+    });
 }
 
 /**
  * 显示窗口
  */
 void MainWindow::slot_show_myself() {
-    updateFileList();
+    slot_updateFileList();
+    m_navigation[0]->m_dir_id = m_current_dir;  // 初始化根目录id
     this->show();
 }
 
@@ -104,7 +134,7 @@ void MainWindow::addConnection(LoginDialog *dialog) const {
  */
 void MainWindow::changeTab(int currentRow) {
     if (currentRow >= 0) {
-        LOG_INFO("changeTab:%d", currentRow);
+        LOG_DEBUG("changeTab:%d", currentRow);
         ui->tabWidget->setCurrentIndex(currentRow);
         switch (currentRow) {
             case 0: {
@@ -131,7 +161,7 @@ void MainWindow::changeTab(int currentRow) {
  * @param index
  */
 void MainWindow::navigationClick(int index) {
-    LOG_INFO("click index:%d", index)
+    LOG_DEBUG("click index:%d", index)
     /**
      * index 为负数为 ">"，点击无效果
      */
@@ -141,6 +171,8 @@ void MainWindow::navigationClick(int index) {
     }
     m_navigation[index * 2]->setProperty("level", "last");
     m_navigation[index * 2]->style()->polish(m_navigation[index * 2].get());
+    m_current_dir = m_navigation[m_navigation.size() - 1]->m_dir_id;
+    slot_updateFileList();
 }
 
 /**
@@ -159,7 +191,8 @@ void MainWindow::showFileNavigation(bool isShow) {
     }
 }
 
-void MainWindow::addNavigation(std::string_view name) {
+void MainWindow::addNavigation(std::string_view name, int id) {
+    LOG_DEBUG("addNavigation:%s", name.data());
     QPoint point = m_navigation[m_navigation.size() - 1]->pos();
     auto tag = std::make_shared<ClickLabel>(-1, ui->navigation);
     QIcon icon = QIcon(":/images/caret-right.svg");
@@ -168,13 +201,16 @@ void MainWindow::addNavigation(std::string_view name) {
     tag->adjustSize();
     tag->setGeometry(QRect(point.x() + m_navigation[m_navigation.size() - 1]->width(), 0, tag->width(),
                            ui->navigation->height()));
+    tag->show();
     auto label = std::make_shared<ClickLabel>(tr(name.data()), (m_navigation.size() + 1) / 2, ui->navigation);
+    label->m_dir_id = id;
     label->adjustSize();
     label->setGeometry(
             QRect(point.x() + m_navigation[m_navigation.size() - 1]->width() + tag->width(), 0, label->width() + 8,
                   ui->navigation->height()));
     connect(label.get(), &ClickLabel::clicked, this, &MainWindow::navigationClick);
     label->setCursor(QCursor(Qt::PointingHandCursor));
+    label->show();
 
     m_navigation[m_navigation.size() - 1]->setProperty("level", "normal");
     m_navigation[m_navigation.size() - 1]->style()->polish(m_navigation[m_navigation.size() - 1].get());
@@ -182,10 +218,9 @@ void MainWindow::addNavigation(std::string_view name) {
     label->style()->polish(label.get());
     m_navigation.push_back(std::move(tag));
     m_navigation.push_back(std::move(label));
-
 }
 
-void MainWindow::updateFileList() {
+void MainWindow::slot_updateFileList() {
     string res;
     map<string, string> headers;
     headers["Token"] = g_config.token;
@@ -196,7 +231,7 @@ void MainWindow::updateFileList() {
     bool flag = req->post("/filelist", data, headers, res);
     if (flag) {
         try {
-//            LOG_INFO("res:%s", res.c_str());
+            LOG_DEBUG("res:%s", res.c_str());
             Document document;
             document.Parse(res.c_str());
             if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
@@ -239,7 +274,7 @@ void MainWindow::updateFileList() {
     req->close_socket();
 }
 
-void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
+void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
     string res;
     map<string, string> headers;
     headers["Token"] = g_config.token;
@@ -248,13 +283,13 @@ void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
     req->init();
     bool flag = req->sendFile("/upload", files, m_current_dir, headers, res);
     if (flag) {
-        LOG_INFO("%s", res.c_str());
+        LOG_DEBUG("%s", res.c_str());
         Document document;
         document.Parse(res.c_str());
         if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
             if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
                 QMessageBox::information(this, "信息", "上传成功!");
-                updateFileList();
+                slot_updateFileList();
             }
             else {
                 QMessageBox::information(this, "信息", document["msg"].GetString());
@@ -269,7 +304,7 @@ void MainWindow::uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
     req->close_socket();
 }
 
-void MainWindow::downloadFile() {
+void MainWindow::slot_downloadFile() {
     string res;
     map<string, string> headers;
     headers["Token"] = g_config.token;
@@ -292,7 +327,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
 }
 
 void MainWindow::dropEvent(QDropEvent *event) {
-    QList <QUrl> urls = event->mimeData()->urls();
+    QList<QUrl> urls = event->mimeData()->urls();
     std::vector<std::shared_ptr<QFileInfo>> files;
     QString suffixs = "sh exe bat";
 
@@ -301,7 +336,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
         if (file->isFile() && !suffixs.contains(file->suffix())) //过滤掉目录和不支持的后缀，如果要支持目录，则要自己遍历每一个目录。
             files.push_back(file);
     }
-    uploadFile(files);
+    slot_uploadFile(files);
 }
 
 void MainWindow::slot_customContextMenu(const QPoint &pos) {
@@ -310,7 +345,12 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
             // 参数 pos 是鼠标按下的位置, 但是不能直接使用, 这个坐标不是屏幕坐标, 是当前窗口的坐标
             // 如果要使用这个坐标需要将其转换为屏幕坐标
             QMenu menu;
-            QAction *act = menu.addAction("上传文件");
+            QAction *act = menu.addAction("刷新");
+            connect(act, &QAction::triggered, this, &MainWindow::slot_updateFileList);
+            menu.addSeparator();
+            act = menu.addAction("下载文件");
+            connect(act, &QAction::triggered, this, &MainWindow::slot_downloadFile);
+            act = menu.addAction("上传文件");
             connect(act, &QAction::triggered, this, [=]() {
                 QString fileName = QFileDialog::getOpenFileName(
                         this,
@@ -326,9 +366,15 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
                 auto file = std::make_shared<QFileInfo>(
                         fileName.toStdString().c_str());    //toLocalFile可以获取文件路径，而非QUrl的file://开头的路径
                 files.push_back(file);
-                uploadFile(files);
+                slot_uploadFile(files);
             });
             act = menu.addAction("新建文件夹");
+            menu.addSeparator();
+            connect(act, &QAction::triggered, this, [=]() {
+                slot_mkdir("新建文件夹");
+            });
+            act = menu.addAction("重命名");
+            connect(act, &QAction::triggered, this, &MainWindow::slot_rename);
             menu.addSeparator();
             act = menu.addAction("删除文件");
             connect(act, &QAction::triggered, this, [=]() {
@@ -343,13 +389,13 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
                 string res;
                 auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
                 req->init();
-                bool flag = req->post("/deletefile", data, headers,res);
+                bool flag = req->post("/deletefile", data, headers, res);
                 if (flag) {
                     Document document;
                     document.Parse(res.c_str());
                     if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
                         if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                            updateFileList();
+                            slot_updateFileList();
                         }
                         else {
                             QMessageBox::information(this, "错误", document["msg"].GetString());
@@ -361,16 +407,88 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
                 }
                 req->close_socket();
             });
-            menu.addSeparator();
-            act = menu.addAction("刷新");
-            connect(act, &QAction::triggered, this, &MainWindow::updateFileList);
             // menu.exec(QCursor::pos());
             // 将窗口坐标转换为屏幕坐标
-            QPoint newpt = this->mapToGlobal(pos);
+            QPoint newpt = ui->fileTableView->mapToGlobal(pos);
             menu.exec(newpt);
 
         }
         default:
             break;
+    }
+}
+
+void MainWindow::slot_mkdir(std::string dir_name) {
+    string res;
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    map<string, string> headers;
+    headers["token"] = g_config.token;
+    map<string, string> data;
+    data["parent"] = std::to_string(m_current_dir);
+    data["name"] = std::move(dir_name);
+    int flag = req->post("/mkdir", data, headers, res);
+    if (flag) {
+        Document document;
+        document.Parse(res.c_str());
+        if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                slot_updateFileList();
+                auto index = m_file_list_model->index(0, 0);
+                ui->fileTableView->openPersistentEditor(index);
+                ui->fileTableView->setFocus();
+                QWidget *editWidget = ui->fileTableView->indexWidget(index);
+                if (editWidget != nullptr) {
+                    editWidget->setFocus();
+                }
+            }
+            else {
+                QMessageBox::information(this, "错误", document["msg"].GetString());
+            }
+        }
+        else {
+            QMessageBox::information(this, "错误", "请重试");
+        }
+    }
+    req->close_socket();
+}
+
+void MainWindow::rename(int type, int id, std::string name) {
+
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    string res;
+    map<string, string> data;
+    data["type"] = std::to_string(type);
+    data["id"] = std::to_string(id);
+    data["name"] = std::move(name);
+    map<string, string> headers;
+    headers["token"] = g_config.token;
+    int flag = req->post("/rename", data, headers, res);
+    if (flag) {
+        Document document;
+        document.Parse(res.c_str());
+        if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                LOG_INFO("rename success")
+            }
+            else {
+                QMessageBox::information(this, "错误", document["msg"].GetString());
+            }
+        }
+        else {
+            QMessageBox::information(this, "错误", "修改失败");
+        }
+    }
+    req->close_socket();
+}
+
+void MainWindow::slot_rename() {
+    auto index = m_file_list_model->index(ui->fileTableView->currentIndex().row(), 0);
+    ui->fileTableView->openPersistentEditor(index);
+    ui->fileTableView->setFocus();
+    QWidget *editWidget = ui->fileTableView->indexWidget(index);
+    if (editWidget != nullptr) {
+        editWidget->setFocus();
     }
 }

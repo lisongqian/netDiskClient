@@ -24,7 +24,9 @@ public:
 
     void showFileNavigation(bool isShow = true);
 
-    void addNavigation(std::string_view name);
+    void addNavigation(std::string_view name,int id);
+    void rename(int type, int id, std::string name);
+
 
     ~MainWindow() override = default;
 
@@ -36,18 +38,22 @@ public slots:
 
     void navigationClick(int index);
 
-    void updateFileList();
+    void slot_updateFileList();
 
-    void uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files);
+    void slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files);
 
-    void downloadFile();
+    void slot_downloadFile();
 
     void slot_customContextMenu(const QPoint &pos);
+
+    void slot_mkdir(std::string dir_name);
+
+    void slot_rename();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
 
-    void dropEvent(QDropEvent *event);
+    void dropEvent(QDropEvent *event) override;
 
 private:
     std::shared_ptr<Ui::MainWindow> ui;

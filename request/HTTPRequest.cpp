@@ -126,7 +126,7 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
     }
     n += snprintf(send_buff + n, send_buff_size - n, "\r\n%s", send_data);
 //    memcpy(send_buff + n, send_data, data_length);
-//    LOG_INFO("send:%s", send_buff);
+    LOG_DEBUG("send:%s", send_buff);
     send(m_socket, send_buff, n, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     delete[] send_data;
@@ -140,7 +140,7 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
         int pos = tmp.rfind('\n');
         if (pos > 0) {
             response = tmp.substr(pos + 1);
-//            LOG_INFO("response:%s", response.c_str())
+//            LOG_DEBUG("response:%s", response.c_str())
             return true;
         }
     }
@@ -211,7 +211,6 @@ bool HTTPRequest::sendFile(const string &url, std::vector<std::shared_ptr<QFileI
         int total_size = n + file_size + data_len;
         data_len = snprintf(data, sizeof(data), "\r\n----%s--", mix_str);
         total_size += data_len;
-        LOG_INFO("total:%d", total_size)
         send(m_socket, data, data_len, 0);  // 第三次发送
         fclose(fp);
     }
@@ -230,7 +229,6 @@ bool HTTPRequest::sendFile(const string &url, std::vector<std::shared_ptr<QFileI
         int pos = tmp.rfind('\n');
         if (pos > 0) {
             response = tmp.substr(pos + 1);
-//            LOG_INFO("response:%s", response.c_str())
             return true;
         }
     }

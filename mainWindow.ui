@@ -88,7 +88,7 @@
        <x>0</x>
        <y>40</y>
        <width>160</width>
-       <height>470</height>
+       <height>541</height>
       </rect>
      </property>
      <property name="autoFillBackground">
@@ -134,41 +134,6 @@
         <selectedoff>:/images/share-selected.svg</selectedoff>:/images/share.svg</iconset>
       </property>
      </item>
-    </widget>
-    <widget class="QProgressBar" name="progressBar">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>540</y>
-       <width>118</width>
-       <height>10</height>
-      </rect>
-     </property>
-     <property name="value">
-      <number>24</number>
-     </property>
-     <property name="textVisible">
-      <bool>false</bool>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="textDirection">
-      <enum>QProgressBar::BottomToTop</enum>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>520</y>
-       <width>53</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>24%</string>
-     </property>
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">

@@ -8,12 +8,15 @@
 #include <fstream>
 #include <direct.h>
 #include <QFontDatabase>
+#include <windows.h>
+#include <dbghelp.h>
 #include "log/log.h"
 #include "common.h"
 #include "config.h"
 #include "MainWindow.h"
 #include "LoginDialog.h"
 
+#define LOG_LEVEL alertLevel::E_INFO
 using std::string;
 using std::cout;
 using std::map;
@@ -21,11 +24,30 @@ using std::endl;
 
 Config g_config;
 
+LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
+{
+    //创建 Dump 文件
+    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hDumpFile != INVALID_HANDLE_VALUE)
+    {
+        //Dump信息
+        MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+        dumpInfo.ExceptionPointers = pException;
+        dumpInfo.ThreadId = GetCurrentThreadId();
+        dumpInfo.ClientPointers = TRUE;
+
+        //写入Dump文件内容
+        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
+    }
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
 int main(int argc, char **argv) {
     // 1. 创建缓存文件目录
     if (0 != access("tmp", 0)) {
         mkdir("tmp");
     }
+    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
     // 2. 接收参数
     g_config.ParseArg(argc, argv);
     Log::instance()->Init(g_config.buff_size);

@@ -71,6 +71,7 @@ target_link_libraries(netDisk PRIVATE
         Qt6::Widgets
         Qt6::Core5Compat
         Qt6::Quick
+        DbgHelp
         )
 
 target_link_libraries(test PRIVATE
