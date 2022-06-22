@@ -35,12 +35,14 @@ public:
 
     bool post(const string &url, const map<string, string> &data, string &response) const;
 
-    bool
-    post(const string &url, const map<string, string> &data, const map<string, string> &header, string &response) const;
+    bool post(const string &url, const map<string, string> &data, const map<string, string> &headers, string &response) const;
 
-    bool
-    sendFile(const string &url, vector<std::shared_ptr<QFileInfo>> files, int current_dir, map<string, string> &headers,
-             string &response) const;
+    bool sendFile(const string &url, const vector<std::shared_ptr<QFileInfo>> &files, int current_dir,
+                  map<string, string> &headers,
+                  string &response) const;
+
+    bool downloadFile(const string &url, const map<string, string> &data, const map<string, string> &headers,
+                      const string& filename) const;
 
 private:
     string m_ip;

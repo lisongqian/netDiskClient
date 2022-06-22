@@ -305,19 +305,25 @@ void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files)
 }
 
 void MainWindow::slot_downloadFile() {
-    string res;
     map<string, string> headers;
     headers["Token"] = g_config.token;
     map<string, string> data;
-    data["filename"] = "0";
-    data["id"] = "0";
-    data["hash"] = "0";
+//    data["filename"] = ;
+//    data["id"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(), 4).data().toString().toStdString();
+    data["hash"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                            5).data().toString().toStdString();
     auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
     req->init();
-    bool flag = req->post("/download", data, headers, res);
+    bool flag = req->downloadFile("/download", data, headers,
+                                  m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                           0).data().toString().toStdString());
     if (flag) {
-
+        QMessageBox::information(this,"成功","下载完成");
     }
+    else{
+        QMessageBox::information(this,"错误","下载失败");
+    }
+    req->close_socket();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {

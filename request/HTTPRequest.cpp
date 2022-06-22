@@ -6,6 +6,7 @@
 //#include <utility>
 #include <map>
 #include <QCryptographicHash>
+#include <direct.h>
 #include "HTTPRequest.h"
 #include "log/log.h"
 #include "common.h"
@@ -83,7 +84,7 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, strin
     return post(url, data, headers, response);
 }
 
-bool HTTPRequest::post(const string &url, const map<string, string> &data, const map<string, string> &header,
+bool HTTPRequest::post(const string &url, const map<string, string> &data, const map<string, string> &headers,
                        string &response) const {
     if (!m_open) {
         return false;
@@ -92,40 +93,24 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
     char *send_data = new char[send_data_len];
     memset(send_data, '\0', send_data_len);
     int data_length = 0;// 实际字符串长度
-    auto iter = header.find("Content-Type");
-    /*文件上传，已弃用*/
-    if (iter != header.end() && iter->second.find("multipart/form-data") != iter->second.npos) {
-        auto file_data = data.find("data")->second;
-        data_length = std::stoi(data.find("length")->second);
-        if (data_length > send_data_len) {
-            delete[] send_data;
-            send_data_len = data_length + 1;
-            send_data = new char[send_data_len];
-            memset(send_data, '\0', send_data_len);
-        }
-        memcpy(send_data, file_data.c_str(), data_length);
+    /*json数据*/
+    for (const auto &it: data) {
+        data_length += snprintf(send_data + data_length, send_data_len - data_length, "%s=%s&",
+                                it.first.c_str(),
+                                it.second.c_str());
     }
-        /*json数据*/
-    else {
-        for (const auto &it: data) {
-            data_length += snprintf(send_data + data_length, send_data_len - data_length, "%s=%s&",
-                                    it.first.c_str(),
-                                    it.second.c_str());
-        }
-        if (data_length > 0)
-            send_data[data_length - 1] = '\0';
-    }
+    if (data_length > 0)
+        send_data[data_length - 1] = '\0';
     unsigned int send_buff_size = 2048 + data_length; // 发送缓冲区长度
     char *send_buff = new char[send_buff_size];
     memset(send_buff, '\0', *send_buff);
     int n = snprintf(send_buff, send_buff_size, "POST\t%s\tHTTP/1.1\r\n", url.c_str());
     n += snprintf(send_buff + n, send_buff_size - n, "Connection:keep-alive\r\n");
     n += snprintf(send_buff + n, send_buff_size - n, "Content-length:%d\r\n", strlen(send_data));
-    for (auto &item: header) {
+    for (auto &item: headers) {
         n += snprintf(send_buff + n, send_buff_size - n, "%s:%s\r\n", item.first.c_str(), item.second.c_str());
     }
     n += snprintf(send_buff + n, send_buff_size - n, "\r\n%s", send_data);
-//    memcpy(send_buff + n, send_data, data_length);
     LOG_DEBUG("send:%s", send_buff);
     send(m_socket, send_buff, n, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
@@ -140,14 +125,14 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
         int pos = tmp.rfind('\n');
         if (pos > 0) {
             response = tmp.substr(pos + 1);
-//            LOG_DEBUG("response:%s", response.c_str())
+            LOG_DEBUG("response:%s", response.c_str())
             return true;
         }
     }
     return false;
 }
 
-bool HTTPRequest::sendFile(const string &url, std::vector<std::shared_ptr<QFileInfo>> files,
+bool HTTPRequest::sendFile(const string &url, const std::vector<std::shared_ptr<QFileInfo>> &files,
                            int current_dir,
                            map<string, string> &headers,
                            string &response) const {
@@ -215,8 +200,6 @@ bool HTTPRequest::sendFile(const string &url, std::vector<std::shared_ptr<QFileI
         fclose(fp);
     }
 
-
-
     /**
      * 接收数据
      */
@@ -235,6 +218,61 @@ bool HTTPRequest::sendFile(const string &url, std::vector<std::shared_ptr<QFileI
     return false;
 }
 
+
+bool HTTPRequest::downloadFile(const string &url, const map<string, string> &data, const map<string, string> &headers,
+                               const string &filename) const {
+    if (!m_open) {
+        return false;
+    }
+    int send_data_len = 256;// 默认缓冲区长度
+    char *send_data = new char[send_data_len];
+    memset(send_data, '\0', send_data_len);
+    int data_length = 0;// 实际字符串长度
+    /*json数据*/
+    for (const auto &it: data) {
+        data_length += snprintf(send_data + data_length, send_data_len - data_length, "%s=%s&",
+                                it.first.c_str(),
+                                it.second.c_str());
+    }
+    if (data_length > 0)
+        send_data[data_length - 1] = '\0';
+    unsigned int send_buff_size = 2048 + data_length; // 发送缓冲区长度
+    char *send_buff = new char[send_buff_size];
+    memset(send_buff, '\0', *send_buff);
+    int n = snprintf(send_buff, send_buff_size, "POST\t%s\tHTTP/1.1\r\n", url.c_str());
+    n += snprintf(send_buff + n, send_buff_size - n, "Connection:keep-alive\r\n");
+    n += snprintf(send_buff + n, send_buff_size - n, "Content-length:%d\r\n", strlen(send_data));
+    for (auto &item: headers) {
+        n += snprintf(send_buff + n, send_buff_size - n, "%s:%s\r\n", item.first.c_str(), item.second.c_str());
+    }
+    n += snprintf(send_buff + n, send_buff_size - n, "\r\n%s", send_data);
+    LOG_DEBUG("send:%s", send_buff);
+    send(m_socket, send_buff, n, 0);
+    //int send(int s, const void * msg, int len, unsigned int flags)
+    delete[] send_data;
+    delete[] send_buff;
+    string file_path = "D:/Downloads/";
+    if (access(file_path.c_str(), 0) == -1) {
+        mkdir(file_path.c_str());
+    }
+    file_path += filename;
+    char *recData = new char[4096];
+    memset(recData, '\0', 4096);
+    FILE *fp = fopen(file_path.c_str(), "wb");
+    int ret;
+    do {
+        ret = recv(m_socket, recData, 4096, 0);
+        if (ret >= 0) {
+            fwrite(recData, 1, ret, fp);
+        }
+        else {
+            LOG_ERROR("recv failed: %d", WSAGetLastError());
+        }
+    }
+    while (ret > 0);
+    fclose(fp);
+    return true;
+}
 
 bool HTTPRequest::close_socket() {
     closesocket(m_socket);
