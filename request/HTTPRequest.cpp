@@ -10,6 +10,7 @@
 #include "HTTPRequest.h"
 #include "log/log.h"
 #include "common.h"
+#include "config.h"
 
 HTTPRequest::HTTPRequest(string ip, int port) : m_ip(std::move(ip)), m_port(port), m_open(false), m_socket(0) {
 }
@@ -111,7 +112,7 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
         n += snprintf(send_buff + n, send_buff_size - n, "%s:%s\r\n", item.first.c_str(), item.second.c_str());
     }
     n += snprintf(send_buff + n, send_buff_size - n, "\r\n%s", send_data);
-    LOG_DEBUG("send:%s", send_buff);
+//    LOG_DEBUG("send:%s", send_buff);
     send(m_socket, send_buff, n, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     delete[] send_data;
@@ -125,7 +126,7 @@ bool HTTPRequest::post(const string &url, const map<string, string> &data, const
         int pos = tmp.rfind('\n');
         if (pos > 0) {
             response = tmp.substr(pos + 1);
-            LOG_DEBUG("response:%s", response.c_str())
+//            LOG_DEBUG("response:%s", response.c_str())
             return true;
         }
     }
@@ -246,12 +247,13 @@ bool HTTPRequest::downloadFile(const string &url, const map<string, string> &dat
         n += snprintf(send_buff + n, send_buff_size - n, "%s:%s\r\n", item.first.c_str(), item.second.c_str());
     }
     n += snprintf(send_buff + n, send_buff_size - n, "\r\n%s", send_data);
-    LOG_DEBUG("send:%s", send_buff);
+//    LOG_DEBUG("send:%s", send_buff);
     send(m_socket, send_buff, n, 0);
     //int send(int s, const void * msg, int len, unsigned int flags)
     delete[] send_data;
     delete[] send_buff;
-    string file_path = "D:/Downloads/";
+    extern Config g_config;
+    string file_path = g_config.download_path;
     if (access(file_path.c_str(), 0) == -1) {
         mkdir(file_path.c_str());
     }

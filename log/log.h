@@ -13,7 +13,12 @@
 using std::string;
 using std::queue;
 
-
+/**
+ * 使用Log::instance()->Init(log_buff_size)初始化
+ * 使用宏定义LOG_INFO、LOG_DEBUG、LOG_WARN、LOG_ERROR输出日志
+ * 日志存放目录：程序运行目录/tmp/XXX.log
+ * 使用#define LOG_LEVEL alertLevel::E_INFO定义日志输出等级，默认为INFO全部输出
+ */
 class Log {
 public:
     static Log *instance() {

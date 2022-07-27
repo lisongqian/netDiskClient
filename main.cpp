@@ -27,7 +27,7 @@ Config g_config;
 LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
 {
     //创建 Dump 文件
-    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hDumpFile != INVALID_HANDLE_VALUE)
     {
         //Dump信息
@@ -37,15 +37,16 @@ LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
         dumpInfo.ClientPointers = TRUE;
 
         //写入Dump文件内容
-        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
+        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, nullptr, nullptr);
     }
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
 int main(int argc, char **argv) {
     // 1. 创建缓存文件目录
-    if (0 != access("tmp", 0)) {
-        mkdir("tmp");
+    const char* tmp_dir = "./tmp";
+    if (0 != access(tmp_dir, 0)) {
+        mkdir(tmp_dir);
     }
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
     // 2. 接收参数

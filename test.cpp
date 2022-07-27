@@ -1,7 +1,9 @@
 //
 // Created by lisongqian on 2022/5/16.
-//
+// encode: GBK
 #include <iostream>
+#include <string>
+#include <utility>
 #include <fstream>
 #include <direct.h>
 #include <QCryptographicHash>
@@ -9,6 +11,67 @@
 
 using namespace std;
 
+class father {
+public:
+    virtual void test()  {
+        cout << "father test" << endl;
+    }
+
+};
+
+class son : public father {
+public:
+    void test() override {
+        cout << "son test" << endl;
+    }
+};
+
+father *fun() {
+    son *s = new son();
+//    father *s = new father();
+    return s;
+}
+
+int main() {
+    father *f = fun();
+    f->test();
+//    cout << typeid(*f).name() << endl;
+    auto s = dynamic_cast<father *>(f);
+    cout << typeid(*s).name() << endl;
+    s->test();
+    delete f;
+    return 0;
+}
+
+#if 0
+void reference(int& v) {
+    std::cout << " 左值引用" << std::endl;
+}
+void reference(int&& v) {
+    std::cout << " 右值引用" << std::endl;
+}
+template <typename T>
+void pass(T&& v) {
+    std::cout << " 普通传参: ";
+    reference(v);
+    std::cout << " std::move 传参: ";
+    reference(std::move(v));
+    std::cout << " std::forward 传参: ";
+    reference(std::forward<T>(v));
+    std::cout << "static_cast<T&&> 传参: ";
+    reference(static_cast<T&&>(v));
+}
+int main() {
+    std::cout << " 传递右值:" << std::endl;
+    pass(1);
+    std::cout << " 传递左值:" << std::endl;
+    int v = 1;
+    pass(v);
+    return 0;
+}
+#endif
+
+#if 0
 int main() {
     string file_name, file_data;
     file_name = "D:/Downloads/test.pdf";
@@ -68,4 +131,6 @@ int main() {
     cout << sizeof(new_str)<<" " << sizeof(*new_str) << endl;
 
     delete[] new_str;
+
 }
+#endif

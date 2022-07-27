@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstdarg>
 #include <sys/time.h>
+#include <direct.h>
 #include "log.h"
 
 #ifndef LOG_LEVEL
@@ -26,11 +27,14 @@ Log::~Log() {
 
 bool Log::Init(int log_buff_size) {
     m_log_buf_size = log_buff_size;
-
+    const char* log_dir = "./tmp";
+    if (0 != access(log_dir, 0)) {
+        mkdir(log_dir);
+    }
     char logFileName[256] = {0};
     time_t now_t = time(nullptr);
     struct tm *now_tm = localtime(&now_t);
-    snprintf(logFileName, 255, "./tmp/netDisk_%d_%02d_%02d.log", now_tm->tm_year + 1900, now_tm->tm_mon + 1,
+    snprintf(logFileName, 255, "%s/netDisk_%d_%02d_%02d.log",log_dir, now_tm->tm_year + 1900, now_tm->tm_mon + 1,
              now_tm->tm_mday);
 
     if (m_fp == nullptr) {
