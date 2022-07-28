@@ -12,6 +12,8 @@
 #include <QFileDialog>
 #include <utility>
 #include <direct.h>
+#include <thread>
+#include <QTextCodec>
 //#include <QDrag>
 #include "MainWindow.h"
 #include "request/HTTPRequest.h"    // winsock2.h 要在windows.h 前 locker.h中引用了windows.h
@@ -269,156 +271,169 @@ void MainWindow::addNavigation(std::string_view name, int id) {
 }
 
 void MainWindow::slot_updateFileList() {
-    string res;
-    map<string, string> headers;
-    headers["Token"] = g_config.token;
-    map<string, string> data;
-    data["dir"] = std::to_string(m_current_dir);
-    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
-    req->init();
-    bool flag = req->post("/filelist", data, headers, res);
-    if (flag) {
-        try {
-            LOG_DEBUG("res:%s", res.c_str());
-            Document document;
-            document.Parse(res.c_str());
-            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
-                if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                    Value &list = document["data"];
-                    if (list.IsArray()) {
-                        m_file_list_model->removeRows(0, m_file_list_model->rowCount());
-                        for (int i = 0; i < list.Size(); ++i) {
-                            Value &item = list[i];
-                            if (item.IsObject()) {
-                                m_file_list_model->setItem(i, FileListHeaderColumn::FILE_NAME,
-                                                           new QStandardItem(item["name"].GetString()));
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_NAME))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                m_file_list_model->setItem(i, FileListHeaderColumn::MODIFY_TIME,
-                                                           new QStandardItem(item["time"].GetString()));
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::MODIFY_TIME))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                if (strcmp(item["type"].GetString(), "0") == 0) {
-                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_STR,
-                                                               new QStandardItem("目录"));
-                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_SIZE,
-                                                               new QStandardItem("-"));
-                                }
-                                else {
-                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_STR,
-                                                               new QStandardItem("文件"));
-                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_SIZE, new QStandardItem(
-                                            file_size_display(strtod(item["size"].GetString(), nullptr)).data()));
-                                }
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_TYPE_STR))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_SIZE))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                m_file_list_model->setItem(i, FileListHeaderColumn::FILE_ID,
-                                                           new QStandardItem(item["id"].GetString()));
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_ID))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                m_file_list_model->setItem(i, FileListHeaderColumn::FILE_HASH,
-                                                           new QStandardItem(item["hash"].GetString()));
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_HASH))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_VALUE,
-                                                           new QStandardItem(item["type"].GetString()));
-                                m_file_list_model->item(i,
-                                                        static_cast<int>(FileListHeaderColumn::FILE_TYPE_VALUE))->setTextAlignment(
-                                        Qt::AlignCenter);
-                                if (!i) {// i==0
-                                    m_current_dir = item["parent"].GetInt();
+    std::thread thread([=]() {
+        string res;
+        map<string, string> headers;
+        headers["Token"] = g_config.token;
+        map<string, string> data;
+        data["dir"] = std::to_string(m_current_dir);
+        auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+        req->init();
+        bool flag = req->post("/filelist", data, headers, res);
+        if (flag) {
+            try {
+//                LOG_DEBUG("res:%s", res.c_str());
+                Document document;
+                document.Parse(res.c_str());
+                if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                    if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                        Value &list = document["data"];
+                        if (list.IsArray()) {
+                            m_file_list_model->removeRows(0, m_file_list_model->rowCount());
+                            for (int i = 0; i < list.Size(); ++i) {
+                                Value &item = list[i];
+                                if (item.IsObject()) {
+                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_NAME,
+                                                               new QStandardItem(item["name"].GetString()));
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_NAME))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    m_file_list_model->setItem(i, FileListHeaderColumn::MODIFY_TIME,
+                                                               new QStandardItem(item["time"].GetString()));
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::MODIFY_TIME))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    if (strcmp(item["type"].GetString(), "0") == 0) {
+                                        m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_STR,
+                                                                   new QStandardItem("目录"));
+                                        m_file_list_model->setItem(i, FileListHeaderColumn::FILE_SIZE,
+                                                                   new QStandardItem("-"));
+                                    }
+                                    else {
+                                        m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_STR,
+                                                                   new QStandardItem("文件"));
+                                        m_file_list_model->setItem(i, FileListHeaderColumn::FILE_SIZE,
+                                                                   new QStandardItem(
+                                                                           file_size_display(
+                                                                                   strtod(item["size"].GetString(),
+                                                                                          nullptr)).data()));
+                                    }
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_TYPE_STR))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_SIZE))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_ID,
+                                                               new QStandardItem(item["id"].GetString()));
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_ID))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_HASH,
+                                                               new QStandardItem(item["hash"].GetString()));
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_HASH))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    m_file_list_model->setItem(i, FileListHeaderColumn::FILE_TYPE_VALUE,
+                                                               new QStandardItem(item["type"].GetString()));
+                                    m_file_list_model->item(i,
+                                                            static_cast<int>(FileListHeaderColumn::FILE_TYPE_VALUE))->setTextAlignment(
+                                            Qt::AlignCenter);
+                                    if (!i) {// i==0
+                                        m_current_dir = item["parent"].GetInt();
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                else {
+                    QMessageBox::information(this, "错误", "请重试");
+                }
+            }
+            catch (std::exception &e) {
+            }
+        }
+        req->close_socket();
+    });
+    thread.detach();
+}
+
+void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
+    std::thread thread([=]() {
+        string res;
+        map<string, string> headers;
+        headers["Token"] = g_config.token;
+        headers["Content-Type"] = "multipart/form-data; boundary=--boundary_yitiaohunxiaozifuchuanchuan";
+        auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+        req->init();
+        bool flag = req->sendFile("/upload", files, m_current_dir, headers, res);
+        if (flag) {
+//            LOG_DEBUG("%s", res.c_str());
+            Document document;
+            document.Parse(res.c_str());
+            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                    QMessageBox::information(this, "信息", "上传成功!");
+                    if (m_local_upload_file.is_open()) {
+                        int current = m_file_upload_model->rowCount();
+                        for (int i = 0; i < files.size(); i++) {
+
+                            string file_name = files[i]->fileName().toStdString();
+                            string file_size = file_size_display(static_cast<double>(files[i]->size()));
+                            string file_path = m_navigation[m_navigation.size() - 1]->text().toStdString();
+                            time_t t = time(nullptr);
+                            char now_time[32] = {'\0'};
+                            strftime(now_time, sizeof(now_time), "%Y-%m-%d_%H:%M", localtime(&t));
+                            string time_str = now_time;
+                            m_local_upload_file << file_name << " ";
+                            m_local_upload_file << file_size << " ";
+                            m_local_upload_file << file_path << " ";
+                            m_local_upload_file << time_str << std::endl;
+                            m_file_upload_model->setItem(current + i,
+                                                         static_cast<int>(LocalListHeaderColumn::FILE_NAME),
+                                                         new QStandardItem(file_name.c_str()));
+                            m_file_upload_model->item(current + i,
+                                                      static_cast<int>(LocalListHeaderColumn::FILE_NAME))->setTextAlignment(
+                                    Qt::AlignCenter);
+                            m_file_upload_model->setItem(current + i,
+                                                         static_cast<int>(LocalListHeaderColumn::FILE_SIZE),
+                                                         new QStandardItem(file_size.c_str()));
+                            m_file_upload_model->item(current + i,
+                                                      static_cast<int>(LocalListHeaderColumn::FILE_SIZE))->setTextAlignment(
+                                    Qt::AlignCenter);
+
+                            m_file_upload_model->setItem(current + i,
+                                                         static_cast<int>(LocalListHeaderColumn::FILE_PATH),
+                                                         new QStandardItem(file_path.c_str()));
+                            m_file_upload_model->item(current + i,
+                                                      static_cast<int>(LocalListHeaderColumn::FILE_PATH))->setTextAlignment(
+                                    Qt::AlignCenter);
+
+                            time_str.replace(time_str.find('_'), 1, " ");
+                            m_file_upload_model->setItem(current + i,
+                                                         static_cast<int>(LocalListHeaderColumn::FILE_TIME),
+                                                         new QStandardItem(time_str.c_str()));
+                            m_file_upload_model->item(current + i,
+                                                      static_cast<int>(LocalListHeaderColumn::FILE_TIME))->setTextAlignment(
+                                    Qt::AlignCenter);
+                        }
+                    }
+                    slot_updateFileList();
+                }
+                else {
+                    QMessageBox::information(this, "信息", document["msg"].GetString());
+
+                }
             }
             else {
                 QMessageBox::information(this, "错误", "请重试");
             }
+
         }
-        catch (std::exception &e) {
-        }
-    }
-    req->close_socket();
-}
-
-void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
-    string res;
-    map<string, string> headers;
-    headers["Token"] = g_config.token;
-    headers["Content-Type"] = "multipart/form-data; boundary=--boundary_yitiaohunxiaozifuchuanchuan";
-    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
-    req->init();
-    bool flag = req->sendFile("/upload", files, m_current_dir, headers, res);
-    if (flag) {
-        LOG_DEBUG("%s", res.c_str());
-        Document document;
-        document.Parse(res.c_str());
-        if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
-            if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                QMessageBox::information(this, "信息", "上传成功!");
-                if (m_local_upload_file.is_open()) {
-                    int current = m_file_upload_model->rowCount();
-                    for (int i = 0; i < files.size(); i++) {
-
-                        string file_name = files[i]->fileName().toStdString();
-                        string file_size = file_size_display(static_cast<double>(files[i]->size()));
-                        string file_path = m_navigation[m_navigation.size() - 1]->text().toStdString();
-                        time_t t = time(nullptr);
-                        char now_time[32] = {'\0'};
-                        strftime(now_time, sizeof(now_time), "%Y-%m-%d_%H:%M", localtime(&t));
-                        string time_str = now_time;
-                        m_local_upload_file << file_name << " ";
-                        m_local_upload_file << file_size << " ";
-                        m_local_upload_file << file_path << " ";
-                        m_local_upload_file << time_str << std::endl;
-                        m_file_upload_model->setItem(current + i, static_cast<int>(LocalListHeaderColumn::FILE_NAME),
-                                                     new QStandardItem(file_name.c_str()));
-                        m_file_upload_model->item(current + i,
-                                                  static_cast<int>(LocalListHeaderColumn::FILE_NAME))->setTextAlignment(
-                                Qt::AlignCenter);
-                        m_file_upload_model->setItem(current + i, static_cast<int>(LocalListHeaderColumn::FILE_SIZE),
-                                                     new QStandardItem(file_size.c_str()));
-                        m_file_upload_model->item(current + i,
-                                                  static_cast<int>(LocalListHeaderColumn::FILE_SIZE))->setTextAlignment(
-                                Qt::AlignCenter);
-
-                        m_file_upload_model->setItem(current + i, static_cast<int>(LocalListHeaderColumn::FILE_PATH),
-                                                     new QStandardItem(file_path.c_str()));
-                        m_file_upload_model->item(current + i,
-                                                  static_cast<int>(LocalListHeaderColumn::FILE_PATH))->setTextAlignment(
-                                Qt::AlignCenter);
-
-                        time_str.replace(time_str.find('_'), 1, " ");
-                        m_file_upload_model->setItem(current + i, static_cast<int>(LocalListHeaderColumn::FILE_TIME),
-                                                     new QStandardItem(time_str.c_str()));
-                        m_file_upload_model->item(current + i,
-                                                  static_cast<int>(LocalListHeaderColumn::FILE_TIME))->setTextAlignment(
-                                Qt::AlignCenter);
-                    }
-                }
-                slot_updateFileList();
-            }
-            else {
-                QMessageBox::information(this, "信息", document["msg"].GetString());
-
-            }
-        }
-        else {
-            QMessageBox::information(this, "错误", "请重试");
-        }
-
-    }
-    req->close_socket();
+        req->close_socket();
+    });
+    thread.detach();
 }
 
 void MainWindow::slot_downloadFile() {
@@ -429,11 +444,13 @@ void MainWindow::slot_downloadFile() {
 //    data["id"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(), 4).data().toString().toStdString();
     data["hash"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
                                             FileListHeaderColumn::FILE_HASH).data().toString().toStdString();
+    // windows 本地编码为gbk
+    QTextCodec *gbk = QTextCodec::codecForName("gbk");
+    string filename = gbk->fromUnicode(m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                                FileListHeaderColumn::FILE_NAME).data().toString().toStdString().c_str()).data();
     auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
     req->init();
-    bool flag = req->downloadFile("/download", data, headers,
-                                  m_file_list_model->index(ui->fileTableView->currentIndex().row(),
-                                                           FileListHeaderColumn::FILE_NAME).data().toString().toStdString());
+    bool flag = req->downloadFile("/download", data, headers, filename);
     if (flag) {
         QMessageBox::information(this, "成功", "下载完成");
         if (m_local_download_file.is_open()) {
@@ -535,34 +552,7 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
             menu.addSeparator();
             act = menu.addAction("删除文件");
             connect(act, &QAction::triggered, this, [=]() {
-                map<string, string> headers;
-                headers["Token"] = g_config.token;
-                int row = ui->fileTableView->currentIndex().row();
-                QModelIndex id_index = m_file_list_model->index(row, 4);
-                QModelIndex type_index = m_file_list_model->index(row, 6);
-                map<string, string> data;
-                data["id"] = m_file_list_model->data(id_index).toString().toStdString();
-                data["type"] = m_file_list_model->data(type_index).toString().toStdString();
-                string res;
-                auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
-                req->init();
-                bool flag = req->post("/deletefile", data, headers, res);
-                if (flag) {
-                    Document document;
-                    document.Parse(res.c_str());
-                    if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
-                        if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                            slot_updateFileList();
-                        }
-                        else {
-                            QMessageBox::information(this, "错误", document["msg"].GetString());
-                        }
-                    }
-                    else {
-                        QMessageBox::information(this, "错误", "请重试");
-                    }
-                }
-                req->close_socket();
+                slot_deleteFile();
             });
             // menu.exec(QCursor::pos());
             // 将窗口坐标转换为屏幕坐标
@@ -650,6 +640,40 @@ void MainWindow::slot_rename() {
     }
 }
 
+void MainWindow::slot_deleteFile() {
+    std::thread thread([=]() {
+        map<string, string> headers;
+        headers["Token"] = g_config.token;
+        int row = ui->fileTableView->currentIndex().row();
+        QModelIndex id_index = m_file_list_model->index(row, 4);
+        QModelIndex type_index = m_file_list_model->index(row, 6);
+        map<string, string> data;
+        data["id"] = m_file_list_model->data(id_index).toString().toStdString();
+        data["type"] = m_file_list_model->data(type_index).toString().toStdString();
+        string res;
+        auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+        req->init();
+        bool flag = req->post("/deletefile", data, headers, res);
+        if (flag) {
+            Document document;
+            document.Parse(res.c_str());
+            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                    slot_updateFileList();
+                }
+                else {
+                    QMessageBox::information(this, "错误", document["msg"].GetString());
+                }
+            }
+            else {
+                QMessageBox::information(this, "错误", "请重试");
+            }
+        }
+        req->close_socket();
+    });
+    thread.detach();
+}
+
 void MainWindow::slot_updateShareRecords() {
 
 }
@@ -714,7 +738,6 @@ void MainWindow::slot_updateDownloadRecords() {
                     Qt::AlignCenter);
         }
         fout.close();
-        LOG_DEBUG("model_size: %d", m_file_download_model->rowCount())
     }
 
 }

@@ -164,40 +164,40 @@ bool HTTPRequest::sendFile(const string &url, const std::vector<std::shared_ptr<
         }
         LOG_DEBUG("md5:%s", ch.result().toHex().data());
 
-        char data[2048 * 3];
-        memset(data, '\0', sizeof(data));
-        int data_len = snprintf(data, sizeof(data), "----%s\r\n", mix_str);
-        data_len += snprintf(data + data_len, sizeof(data) - data_len,
-                             "Content-Disposition: form-data; parent=\"%d\"; name=\"%s\"; filename=\"%s\"; size=%d\r\n\r\n",
-                             current_dir, file->fileName().toStdString().c_str(),
-                             ch.result().toHex().toStdString().c_str(), file_size);
+        char file_head_data[2048];
+        memset(file_head_data, '\0', sizeof(file_head_data));
+        int file_head_data_len = snprintf(file_head_data, sizeof(file_head_data), "----%s\r\n", mix_str);
+        file_head_data_len += snprintf(file_head_data + file_head_data_len, sizeof(file_head_data) - file_head_data_len,
+                                       "Content-Disposition: form-data; parent=\"%d\"; name=\"%s\"; filename=\"%s\"; size=%d\r\n\r\n",
+                                       current_dir, file->fileName().toStdString().c_str(),
+                                       ch.result().toHex().toStdString().c_str(), file_size);
         /**
-         * http请求头
+         * http请求
          */
         unsigned int send_buff_size = 2048; // 发送缓冲区长度
-        char *send_buff = new char[send_buff_size];
-        memset(send_buff, '\0', *send_buff);
+        char send_buff[2048];
+        memset(send_buff, '\0', send_buff_size);
         int n = snprintf(send_buff, send_buff_size, "POST\t%s\tHTTP/1.1\r\n", url.c_str());
         n += snprintf(send_buff + n, send_buff_size - n, "Connection:keep-alive\r\n");
         n += snprintf(send_buff + n, send_buff_size - n, "Content-length:%d\r\n",
-                      file_size + data_len + strlen(mix_str) + 8);
+                      file_size + file_head_data_len + strlen(mix_str) + 8);
         for (auto &header: headers) {
             n += snprintf(send_buff + n, send_buff_size - n, "%s:%s\r\n", header.first.c_str(), header.second.c_str());
         }
         n += snprintf(send_buff + n, send_buff_size - n, "\r\n");
-        send(m_socket, send_buff, n, 0);
+        send(m_socket, send_buff, n, 0);// 第一次发送——发送请求头
         //int send(int s, const void * msg, int len, unsigned int flags)
-        delete[] send_buff;
-
-        send(m_socket, data, data_len, 0);  // 第一次发送
+        send(m_socket, file_head_data, file_head_data_len, 0);  // 第二次发送——发送请求体的文件头
         rewind(fp);
         while ((size = fread(buf, 1, 4096, fp)) != 0) {
-            send(m_socket, reinterpret_cast<char *>( buf), static_cast<int>(size), 0);
+            send(m_socket, reinterpret_cast<char *>( buf), static_cast<int>(size), 0);// 第三次发送——发送请求体的文件数据
         }
-        int total_size = n + file_size + data_len;
-        data_len = snprintf(data, sizeof(data), "\r\n----%s--", mix_str);
-        total_size += data_len;
-        send(m_socket, data, data_len, 0);  // 第三次发送
+        int total_size = n + file_size + file_head_data_len;
+        int file_end_data_len = snprintf(file_head_data, sizeof(file_head_data), "\r\n----%s--", mix_str);
+        total_size += file_end_data_len;
+        send(m_socket, file_head_data, file_end_data_len, 0);  // 第四次发送请求体的文件结束符
+//        LOG_DEBUG("file_end:%s", file_head_data)
+        LOG_DEBUG("file_size:%d", file_size);
         fclose(fp);
     }
 

@@ -46,7 +46,7 @@ public:
 
     void rename(int type, int id, std::string name);
 
-    ~MainWindow();
+    ~MainWindow() override;
 
 public slots:
 
@@ -85,6 +85,8 @@ public slots:
     void slot_mkdir(std::string dir_name);
 
     void slot_rename();
+
+    void slot_deleteFile();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

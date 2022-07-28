@@ -46,7 +46,7 @@ public:
 
 private:
     string m_ip;
-    int m_port;
+    short m_port;
     bool m_open;
     SOCKET m_socket;
 };
