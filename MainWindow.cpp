@@ -4,7 +4,6 @@
 
 #include <QFile>
 #include <QDragEnterEvent>
-//#include <QDropEvent>
 #include <QMimeData>
 #include <QCryptographicHash>
 #include <QMessageBox>
@@ -68,13 +67,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     fileListHeaders << "文件名" << "修改时间" << "类型" << "文件大小" << "id" << "哈希值" << "类型值";
     m_file_list_model->setColumnCount(static_cast<int>(fileListHeaders.size()));
     m_file_list_model->setHorizontalHeaderLabels(fileListHeaders);
-//    m_file_list_model->setHeaderData(0, Qt::Horizontal, "文件名");
-//    m_file_list_model->setHeaderData(1, Qt::Horizontal, "修改时间");
-//    m_file_list_model->setHeaderData(2, Qt::Horizontal, "类型");
-//    m_file_list_model->setHeaderData(3, Qt::Horizontal, "文件大小");
-//    m_file_list_model->setHeaderData(4, Qt::Horizontal, "id");
-//    m_file_list_model->setHeaderData(5, Qt::Horizontal, "哈希值");
-//    m_file_list_model->setHeaderData(6, Qt::Horizontal, "类型值");
     ui->fileTableView->setModel(m_file_list_model.get());
     ui->fileTableView->verticalHeader()->hide();
     ui->fileTableView->setEditTriggers(QTableView::NoEditTriggers);
@@ -88,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     ui->fileTableView->setColumnHidden(FileListHeaderColumn::FILE_TYPE_VALUE, true);
     ui->fileTableView->setSelectionBehavior(QTableView::SelectRows);
     ui->fileTableView->setSelectionMode(QTableView::SingleSelection);
+//    ui->fileTableView->setAlternatingRowColors(true);
 
     m_file_download_model = std::make_shared<QStandardItemModel>();
     QStringList download_headers;
@@ -122,30 +115,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     ui->uploadTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 
-    /*重命名功能*/
-    connect(m_file_list_model.get(), &QAbstractItemModel::dataChanged, this,
-            [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
-                if (topLeft == bottomRight) {
-                    if (topLeft.column() == 0) {
-                        if (ui->fileTableView->isPersistentEditorOpen(topLeft)) {
-                            ui->fileTableView->closePersistentEditor(topLeft);
-                            QVariant v = m_file_list_model->data(topLeft);
-                            rename(m_file_list_model->data(m_file_list_model->index(topLeft.row(), 6)).toInt(),
-                                   m_file_list_model->data(m_file_list_model->index(topLeft.row(), 4)).toInt(),
-                                   v.toString().toStdString());
-                        }
-                    }
-                }
-            });
+
 
     /*表格双击功能*/
     connect(ui->fileTableView, &QAbstractItemView::doubleClicked, this, [=](const QModelIndex &index) {
+        m_queue_lock.lock();
         QVariant v = m_file_list_model->data(m_file_list_model->index(index.row(), 6));
         if (v.toString().toStdString() == "0") {
             m_current_dir = m_file_list_model->data(m_file_list_model->index(index.row(), 4)).toInt();
             addNavigation(m_file_list_model->data(m_file_list_model->index(index.row(), 0)).toString().toStdString(),
                           m_current_dir);
+            m_queue_lock.unlock();
             slot_updateFileList();
+        }
+        else {
+            m_queue_lock.unlock();
         }
     });
     /*本地用户记录*/
@@ -159,6 +143,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     slot_updateUploadRecords();
     m_local_download_file.open(m_download_score_file_path, std::ios::in | std::ios::app);
     m_local_upload_file.open(m_upload_score_file_path, std::ios::in | std::ios::app);
+
+    connect(this, &MainWindow::sig_information, this, &MainWindow::slot_message);
 }
 
 /**
@@ -184,7 +170,7 @@ void MainWindow::addConnection(LoginDialog *dialog) const {
  */
 void MainWindow::changeTab(int currentRow) {
     if (currentRow >= 0) {
-        LOG_DEBUG("changeTab:%d", currentRow);
+//        LOG_DEBUG("changeTab:%d", currentRow);
         ui->tabWidget->setCurrentIndex(currentRow);
         switch (currentRow) {
             case 0: {
@@ -211,7 +197,7 @@ void MainWindow::changeTab(int currentRow) {
  * @param index
  */
 void MainWindow::navigationClick(int index) {
-    LOG_DEBUG("click index:%d", index)
+//    LOG_DEBUG("click index:%d", index)
     /**
      * index 为负数为 ">"，点击无效果
      */
@@ -242,7 +228,7 @@ void MainWindow::showFileNavigation(bool isShow) {
 }
 
 void MainWindow::addNavigation(std::string_view name, int id) {
-    LOG_DEBUG("addNavigation:%s", name.data());
+//    LOG_DEBUG("addNavigation:%s", name.data());
     QPoint point = m_navigation[m_navigation.size() - 1]->pos();
     auto tag = std::make_shared<ClickLabel>(-1, ui->navigation);
     QIcon icon = QIcon(":/images/caret-right.svg");
@@ -289,7 +275,9 @@ void MainWindow::slot_updateFileList() {
                     if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
                         Value &list = document["data"];
                         if (list.IsArray()) {
+                            m_queue_lock.lock();
                             m_file_list_model->removeRows(0, m_file_list_model->rowCount());
+                            m_file_list_model->setRowCount(static_cast<int>(list.Size()));
                             for (int i = 0; i < list.Size(); ++i) {
                                 Value &item = list[i];
                                 if (item.IsObject()) {
@@ -344,11 +332,12 @@ void MainWindow::slot_updateFileList() {
                                     }
                                 }
                             }
+                            m_queue_lock.unlock();
                         }
                     }
                 }
                 else {
-                    QMessageBox::information(this, "错误", "请重试");
+                    emit sig_information(this, "错误", "请重试");
                 }
             }
             catch (std::exception &e) {
@@ -374,7 +363,7 @@ void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files)
             document.Parse(res.c_str());
             if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
                 if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
-                    QMessageBox::information(this, "信息", "上传成功!");
+                    emit sig_information(this, "信息", "上传成功!");
                     if (m_local_upload_file.is_open()) {
                         int current = m_file_upload_model->rowCount();
                         for (int i = 0; i < files.size(); i++) {
@@ -422,12 +411,12 @@ void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files)
                     slot_updateFileList();
                 }
                 else {
-                    QMessageBox::information(this, "信息", document["msg"].GetString());
+                    emit sig_information(this, "信息", document["msg"].GetString());
 
                 }
             }
             else {
-                QMessageBox::information(this, "错误", "请重试");
+                emit sig_information(this, "错误", "请重试");
             }
 
         }
@@ -437,61 +426,72 @@ void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files)
 }
 
 void MainWindow::slot_downloadFile() {
-    map<string, string> headers;
-    headers["Token"] = g_config.token;
-    map<string, string> data;
+    std::thread thread([=]() {
+        map<string, string> headers;
+        headers["Token"] = g_config.token;
+        map<string, string> data;
+        m_queue_lock.lock();
 //    data["filename"] = ;
 //    data["id"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(), 4).data().toString().toStdString();
-    data["hash"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
-                                            FileListHeaderColumn::FILE_HASH).data().toString().toStdString();
-    // windows 本地编码为gbk
-    QTextCodec *gbk = QTextCodec::codecForName("gbk");
-    string filename = gbk->fromUnicode(m_file_list_model->index(ui->fileTableView->currentIndex().row(),
-                                                                FileListHeaderColumn::FILE_NAME).data().toString().toStdString().c_str()).data();
-    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
-    req->init();
-    bool flag = req->downloadFile("/download", data, headers, filename);
-    if (flag) {
-        QMessageBox::information(this, "成功", "下载完成");
-        if (m_local_download_file.is_open()) {
-            string file_name = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
-                                                        FileListHeaderColumn::FILE_NAME).data().toString().toStdString();
-            string file_size = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
-                                                        FileListHeaderColumn::FILE_SIZE).data().toString().toStdString();
-            string file_path = g_config.download_path + file_name;
-            time_t t = time(nullptr);
-            char now_time[32] = {'\0'};
-            strftime(now_time, sizeof(now_time), "%Y-%m-%d_%H:%M", localtime(&t));
-            string time_str = now_time;
-            m_local_download_file << file_name << " ";
-            m_local_download_file << file_size << " ";
-            m_local_download_file << file_path << " ";
-            m_local_download_file << time_str << std::endl;
-            int current = m_file_download_model->rowCount();
-            m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_NAME),
-                                           new QStandardItem(file_name.c_str()));
-            m_file_download_model->item(current, static_cast<int>(LocalListHeaderColumn::FILE_NAME))->setTextAlignment(
-                    Qt::AlignCenter);
-            m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_SIZE),
-                                           new QStandardItem(file_size.c_str()));
-            m_file_download_model->item(current, static_cast<int>(LocalListHeaderColumn::FILE_SIZE))->setTextAlignment(
-                    Qt::AlignCenter);
-            m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_PATH),
-                                           new QStandardItem(file_path.c_str()));
-            m_file_download_model->item(current, static_cast<int>(LocalListHeaderColumn::FILE_PATH))->setTextAlignment(
-                    Qt::AlignCenter);
+        data["hash"] = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                FileListHeaderColumn::FILE_HASH).data().toString().toStdString();
+        // windows 本地编码为gbk
+        QTextCodec *gbk = QTextCodec::codecForName("gbk");
+        string filename = gbk->fromUnicode(m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                                    FileListHeaderColumn::FILE_NAME).data().toString().toStdString().c_str()).data();
+        m_queue_lock.unlock();
+        auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+        req->init();
+        bool flag = req->downloadFile("/download", data, headers, filename);
+        if (flag) {
+            emit sig_information(this, "成功", "下载完成");
+            if (m_local_download_file.is_open()) {
+                m_queue_lock.lock();
+                string file_name = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                            FileListHeaderColumn::FILE_NAME).data().toString().toStdString();
+                string file_size = m_file_list_model->index(ui->fileTableView->currentIndex().row(),
+                                                            FileListHeaderColumn::FILE_SIZE).data().toString().toStdString();
+                m_queue_lock.unlock();
+                string file_path = g_config.download_path + file_name;
+                time_t t = time(nullptr);
+                char now_time[32] = {'\0'};
+                strftime(now_time, sizeof(now_time), "%Y-%m-%d_%H:%M", localtime(&t));
+                string time_str = now_time;
+                m_local_download_file << file_name << " ";
+                m_local_download_file << file_size << " ";
+                m_local_download_file << file_path << " ";
+                m_local_download_file << time_str << std::endl;
+                int current = m_file_download_model->rowCount();
+                m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_NAME),
+                                               new QStandardItem(file_name.c_str()));
+                m_file_download_model->item(current,
+                                            static_cast<int>(LocalListHeaderColumn::FILE_NAME))->setTextAlignment(
+                        Qt::AlignCenter);
+                m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_SIZE),
+                                               new QStandardItem(file_size.c_str()));
+                m_file_download_model->item(current,
+                                            static_cast<int>(LocalListHeaderColumn::FILE_SIZE))->setTextAlignment(
+                        Qt::AlignCenter);
+                m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_PATH),
+                                               new QStandardItem(file_path.c_str()));
+                m_file_download_model->item(current,
+                                            static_cast<int>(LocalListHeaderColumn::FILE_PATH))->setTextAlignment(
+                        Qt::AlignCenter);
 
-            time_str.replace(time_str.find('_'), 1, " ");
-            m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_TIME),
-                                           new QStandardItem(time_str.c_str()));
-            m_file_download_model->item(current, static_cast<int>(LocalListHeaderColumn::FILE_TIME))->setTextAlignment(
-                    Qt::AlignCenter);
+                time_str.replace(time_str.find('_'), 1, " ");
+                m_file_download_model->setItem(current, static_cast<int>(LocalListHeaderColumn::FILE_TIME),
+                                               new QStandardItem(time_str.c_str()));
+                m_file_download_model->item(current,
+                                            static_cast<int>(LocalListHeaderColumn::FILE_TIME))->setTextAlignment(
+                        Qt::AlignCenter);
+            }
         }
-    }
-    else {
-        QMessageBox::information(this, "错误", "下载失败");
-    }
-    req->close_socket();
+        else {
+            emit sig_information(this, "错误", "下载失败");
+        }
+        req->close_socket();
+    });
+    thread.detach();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
@@ -581,20 +581,15 @@ void MainWindow::slot_mkdir(std::string dir_name) {
         if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
             if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
                 slot_updateFileList();
-                auto index = m_file_list_model->index(0, 0);
-                ui->fileTableView->openPersistentEditor(index);
-                ui->fileTableView->setFocus();
-                QWidget *editWidget = ui->fileTableView->indexWidget(index);
-                if (editWidget != nullptr) {
-                    editWidget->setFocus();
-                }
+//                Sleep(20);
+                slot_rename();
             }
             else {
-                QMessageBox::information(this, "错误", document["msg"].GetString());
+                emit sig_information(this, "错误", document["msg"].GetString());
             }
         }
         else {
-            QMessageBox::information(this, "错误", "请重试");
+            emit sig_information(this, "错误", "请重试");
         }
     }
     req->close_socket();
@@ -620,23 +615,57 @@ void MainWindow::rename(int type, int id, std::string name) {
                 LOG_INFO("rename success")
             }
             else {
-                QMessageBox::information(this, "错误", document["msg"].GetString());
+                emit sig_information(this, "错误", document["msg"].GetString());
+                slot_updateFileList();
             }
         }
         else {
-            QMessageBox::information(this, "错误", "修改失败");
+            emit sig_information(this, "错误", "修改失败");
+            slot_updateFileList();
         }
     }
     req->close_socket();
 }
 
+/**
+ * 重命名用
+ * @param topLeft
+ * @param bottomRight
+ */
+void MainWindow::slot_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+    LOG_DEBUG("slot_dataChanged触发,index:%d,%d", topLeft.row(), topLeft.column());
+    if (topLeft == bottomRight) {
+        if (topLeft.column() == 0) {
+            if (ui->fileTableView->isPersistentEditorOpen(topLeft)) {
+                ui->fileTableView->closePersistentEditor(topLeft);
+                m_queue_lock.lock();
+                int type = m_file_list_model->data(
+                        m_file_list_model->index(topLeft.row(), FileListHeaderColumn::FILE_TYPE_VALUE)).toInt();
+                int id = m_file_list_model->data(
+                        m_file_list_model->index(topLeft.row(), FileListHeaderColumn::FILE_ID)).toInt();
+                string name = m_file_list_model->data(topLeft).toString().toStdString();
+                m_queue_lock.unlock();
+                rename(type, id, name);
+                disconnect(m_file_list_model.get(), &QAbstractItemModel::dataChanged, this,
+                           &MainWindow::slot_dataChanged);
+            }
+        }
+    }
+}
+
 void MainWindow::slot_rename() {
+    /*重命名功能*/
+    connect(m_file_list_model.get(), &QAbstractItemModel::dataChanged, this, &MainWindow::slot_dataChanged);
+    m_queue_lock.lock();
     auto index = m_file_list_model->index(ui->fileTableView->currentIndex().row(), 0);
     ui->fileTableView->openPersistentEditor(index);
     ui->fileTableView->setFocus();
     QWidget *editWidget = ui->fileTableView->indexWidget(index);
+    m_queue_lock.unlock();
     if (editWidget != nullptr) {
         editWidget->setFocus();
+        disconnect(editWidget, SIGNAL(editingFinished()), editWidget, SLOT(close()));
+        connect(editWidget, SIGNAL(editingFinished()), editWidget, SLOT(close()));
     }
 }
 
@@ -645,11 +674,16 @@ void MainWindow::slot_deleteFile() {
         map<string, string> headers;
         headers["Token"] = g_config.token;
         int row = ui->fileTableView->currentIndex().row();
-        QModelIndex id_index = m_file_list_model->index(row, 4);
-        QModelIndex type_index = m_file_list_model->index(row, 6);
+//        LOG_INFO("row_num:%d", row)
+        m_queue_lock.lock();
+        QModelIndex id_index = m_file_list_model->index(row, FileListHeaderColumn::FILE_ID);
+        QModelIndex type_index = m_file_list_model->index(row, FileListHeaderColumn::FILE_TYPE_VALUE);
         map<string, string> data;
         data["id"] = m_file_list_model->data(id_index).toString().toStdString();
         data["type"] = m_file_list_model->data(type_index).toString().toStdString();
+        LOG_INFO("filename:%s", m_file_list_model->data(
+                m_file_list_model->index(row, FileListHeaderColumn::FILE_NAME)).toString().toStdString().c_str())
+        m_queue_lock.unlock();
         string res;
         auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
         req->init();
@@ -662,11 +696,11 @@ void MainWindow::slot_deleteFile() {
                     slot_updateFileList();
                 }
                 else {
-                    QMessageBox::information(this, "错误", document["msg"].GetString());
+                    emit sig_information(this, "错误", document["msg"].GetString());
                 }
             }
             else {
-                QMessageBox::information(this, "错误", "请重试");
+                emit sig_information(this, "错误", "请重试");
             }
         }
         req->close_socket();
@@ -740,6 +774,10 @@ void MainWindow::slot_updateDownloadRecords() {
         fout.close();
     }
 
+}
+
+void MainWindow::slot_message(QWidget *parent, const QString &title, const QString &text) {
+    QMessageBox::information(parent, title, text);
 }
 
 MainWindow::~MainWindow() {

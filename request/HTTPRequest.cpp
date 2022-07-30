@@ -155,11 +155,11 @@ bool HTTPRequest::sendFile(const string &url, const std::vector<std::shared_ptr<
 //        fseek(fp, 0L, SEEK_END);
 //        int file_size = ftell(fp);
         QCryptographicHash ch(QCryptographicHash::Md5);
-        unsigned char buf[4096];
+        char buf[4096];
         size_t size;
         int file_size = 0;
         while ((size = fread(buf, 1, 4096, fp)) != 0) {
-            ch.addData((char *) buf, static_cast<int>(size));
+            ch.addData(buf, static_cast<int>(size));
             file_size += static_cast<int>(size);
         }
         LOG_DEBUG("md5:%s", ch.result().toHex().data());
@@ -190,14 +190,14 @@ bool HTTPRequest::sendFile(const string &url, const std::vector<std::shared_ptr<
         send(m_socket, file_head_data, file_head_data_len, 0);  // 第二次发送——发送请求体的文件头
         rewind(fp);
         while ((size = fread(buf, 1, 4096, fp)) != 0) {
-            send(m_socket, reinterpret_cast<char *>( buf), static_cast<int>(size), 0);// 第三次发送——发送请求体的文件数据
+            send(m_socket, buf, static_cast<int>(size), 0);// 第三次发送——发送请求体的文件数据
         }
         int total_size = n + file_size + file_head_data_len;
         int file_end_data_len = snprintf(file_head_data, sizeof(file_head_data), "\r\n----%s--", mix_str);
         total_size += file_end_data_len;
         send(m_socket, file_head_data, file_end_data_len, 0);  // 第四次发送请求体的文件结束符
 //        LOG_DEBUG("file_end:%s", file_head_data)
-        LOG_DEBUG("file_size:%d", file_size);
+        LOG_DEBUG("parent:%d,file_size:%d", current_dir, file_size);
         fclose(fp);
     }
 

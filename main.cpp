@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         string username, password;
         getline(in, username);
         getline(in, password);
-        LOG_INFO("%s,%s", username.c_str(), password.c_str())
+//        LOG_INFO("%s,%s", username.c_str(), password.c_str())
         bool flag = dlg.login(username, password);
         if (flag) {
             mainWindow.slot_show_myself();

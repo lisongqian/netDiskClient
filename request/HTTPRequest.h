@@ -12,6 +12,7 @@
 #else
 
 #include <WinSock2.h>
+#include <Windows.h>
 #include <QFileInfo>
 
 #pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll

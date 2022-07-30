@@ -15,6 +15,7 @@
 #include "ui_mainWindow.h"
 #include "LoginDialog.h"
 #include "components/ClickLabel.h"
+#include "lock/locker.h"
 
 enum FileListHeaderColumn {
     FILE_NAME = 0,
@@ -88,18 +89,24 @@ public slots:
 
     void slot_deleteFile();
 
+    void slot_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+    void slot_message(QWidget *parent, const QString &title, const QString &text);
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
 
     void dropEvent(QDropEvent *event) override;
+    signals:
+    void sig_information(QWidget *parent, const QString &title, const QString &text);
 
 private:
     std::shared_ptr<Ui::MainWindow> ui;
     std::vector<std::shared_ptr<ClickLabel>> m_navigation;
     std::shared_ptr<QStandardItemModel> m_file_list_model;
+    locker m_queue_lock;                                        // filelist互斥锁
     std::shared_ptr<QStandardItemModel> m_file_share_model;     // TODO 服务器记录
-    std::shared_ptr<QStandardItemModel> m_file_download_model;  //  本地存储记录
-    std::shared_ptr<QStandardItemModel> m_file_upload_model;    //  本地存储记录
+    std::shared_ptr<QStandardItemModel> m_file_download_model;  // 本地存储记录
+    std::shared_ptr<QStandardItemModel> m_file_upload_model;    // 本地存储记录
     int m_current_dir;
     std::fstream m_local_download_file;
     std::fstream m_local_upload_file;
