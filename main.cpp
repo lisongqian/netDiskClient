@@ -5,7 +5,6 @@
 #include <QFile>
 #include <QObject>
 #include <QUuid>
-#include <fstream>
 #include <direct.h>
 #include <QFontDatabase>
 #include <windows.h>
@@ -27,7 +26,7 @@ Config g_config;
 LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
 {
     //创建 Dump 文件
-    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hDumpFile != INVALID_HANDLE_VALUE)
     {
         //Dump信息

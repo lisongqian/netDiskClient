@@ -186,6 +186,7 @@ bool HTTPRequest::sendFile(const string &url, const std::vector<std::shared_ptr<
         }
         n += snprintf(send_buff + n, send_buff_size - n, "\r\n");
         send(m_socket, send_buff, n, 0);// 第一次发送——发送请求头
+        Sleep(2);
         //int send(int s, const void * msg, int len, unsigned int flags)
         send(m_socket, file_head_data, file_head_data_len, 0);  // 第二次发送——发送请求体的文件头
         rewind(fp);

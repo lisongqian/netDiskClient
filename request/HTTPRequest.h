@@ -6,16 +6,17 @@
 #define NETDISK_HTTPREQUEST_H
 
 #include <iostream>
-
+#include <QFileInfo>
 #ifdef UNIX
 #include <pthread.h>
 #else
 
-#include <WinSock2.h>
-#include <Windows.h>
-#include <QFileInfo>
+//#include <WinSock2.h>
+//#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
 
-#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
+#include <winsock.h>
+#pragma comment(lib, "wsock32.lib")
+
 #endif
 
 using std::map;

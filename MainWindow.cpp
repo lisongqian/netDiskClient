@@ -13,7 +13,6 @@
 #include <direct.h>
 #include <thread>
 #include <QTextCodec>
-//#include <QDrag>
 #include "MainWindow.h"
 #include "request/HTTPRequest.h"    // winsock2.h 要在windows.h 前 locker.h中引用了windows.h
 #include "log/log.h"
@@ -257,7 +256,7 @@ void MainWindow::addNavigation(std::string_view name, int id) {
 }
 
 void MainWindow::slot_updateFileList() {
-    std::thread thread([=]() {
+//    std::thread thread([=]() {
         string res;
         map<string, string> headers;
         headers["Token"] = g_config.token;
@@ -276,7 +275,7 @@ void MainWindow::slot_updateFileList() {
                         Value &list = document["data"];
                         if (list.IsArray()) {
                             m_queue_lock.lock();
-                            m_file_list_model->removeRows(0, m_file_list_model->rowCount());
+                            m_file_list_model->removeRows(0, m_file_list_model->rowCount());// TODO Abort Issue and I dont know why
                             m_file_list_model->setRowCount(static_cast<int>(list.Size()));
                             for (int i = 0; i < list.Size(); ++i) {
                                 Value &item = list[i];
@@ -344,8 +343,8 @@ void MainWindow::slot_updateFileList() {
             }
         }
         req->close_socket();
-    });
-    thread.detach();
+//    });
+//    thread.detach();
 }
 
 void MainWindow::slot_uploadFile(std::vector<std::shared_ptr<QFileInfo>> &files) {
@@ -535,7 +534,7 @@ void MainWindow::slot_customContextMenu(const QPoint &pos) {
 //                    QMessageBox::warning(this, "Warning!", "Failed to open the video!");
                     return;
                 }
-                LOG_INFO("%s", fileName.toStdString().c_str());
+                LOG_INFO("%s", fileName.toStdString().c_str())
                 std::vector<std::shared_ptr<QFileInfo>> files;
                 auto file = std::make_shared<QFileInfo>(
                         fileName.toStdString().c_str());    //toLocalFile可以获取文件路径，而非QUrl的file://开头的路径
@@ -633,7 +632,7 @@ void MainWindow::rename(int type, int id, std::string name) {
  * @param bottomRight
  */
 void MainWindow::slot_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight) {
-    LOG_DEBUG("slot_dataChanged触发,index:%d,%d", topLeft.row(), topLeft.column());
+    LOG_DEBUG("slot_dataChanged触发,index:%d,%d", topLeft.row(), topLeft.column())
     if (topLeft == bottomRight) {
         if (topLeft.column() == 0) {
             if (ui->fileTableView->isPersistentEditorOpen(topLeft)) {
