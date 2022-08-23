@@ -3,7 +3,7 @@
         <file>common.qss</file>
         <file>main.qss</file>
         <file>components.qss</file>
-
+        <file>login.qss</file>
         <file>images/cloudy.svg</file>
         <file>images/setting.svg</file>
         <file>images/share.svg</file>
@@ -20,5 +20,6 @@
         <file>images/upload-selected.svg</file>
         <file>images/caret-right.svg</file>
         <file>PingFang.ttf</file>
+        <file>translations/qt_zh_CN.qm</file>
     </qresource>
 </RCC>

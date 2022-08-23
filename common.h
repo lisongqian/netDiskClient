@@ -60,4 +60,9 @@ enum class alertLevel : unsigned int {
     E_WARN,
     E_ERROR
 };
+
+enum FileType {
+    E_DIR = 0,
+    E_FILE = 1,
+};
 #endif //NETDISK_COMMON_H

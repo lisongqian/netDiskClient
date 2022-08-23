@@ -45,6 +45,8 @@ elseif (WIN32)
     link_libraries(ws2_32 wsock32)
 endif ()
 
+#set(TS_FILES
+#        translations/zh_CN.ts)
 
 find_package(Qt6 REQUIRED COMPONENTS
         Core
@@ -52,7 +54,11 @@ find_package(Qt6 REQUIRED COMPONENTS
         Widgets
         Core5Compat
         Quick
+#        LinguistTools
         )
+
+#qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES})
+
 QT_WRAP_UI(UI_RESOURCES ${RESOURCES})
 
 add_executable(netDisk

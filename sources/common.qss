@@ -1,9 +1,6 @@
 QMainWindow{
 background-color: #ffffff;
 }
-QDialog{
-background-color: #d9ecff;
-}
 QTabWidget::tab-bar
 {
 left:0px;
@@ -23,42 +20,7 @@ font:18px;
 background-color: #ffffff;
 border-width:1px;
 }
-QTabBar::tab:first{border-top-left-radius: 15px;}
-QTabBar::tab:last{border-top-right-radius: 15px;}
-QTabBar::tab:selected{
-color: #000000;
-background-color: #ffffff;
-}
-QTabBar::tab:!selected{
-color: #73767a;
-background-color:#f0f0f0;
-}
-QTabWidget{
-}
-/*文本输入框*/
-QLineEdit
-{
-background-color: #f0f0f0;
-border:1px solid #dcdfe6;
-border-radius:5px;
-padding:2px 8px;
-}
-QLineEdit:hover{
-border-color: #c0c4cc;
-}
-QLineEdit:focus{
-background-color: #ffffff;
-border-color: #409EFF;
-}
 
-QPushButton{
-color: #ffffff;
-background-color: #409EFF;
-border-radius: 5px;
-}
-QPushButton:pressed,QPushButton:hover{
-background-color: #79bbff;
-}
 QProgressBar {
 color: #409EFF;
 }

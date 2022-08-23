@@ -20,6 +20,10 @@ extern Config g_config;
 
 LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(std::make_shared<Ui::LoginDialog>()) {
     ui->setupUi(this);
+    if (QFile qss(":/login.qss");qss.open(QFile::ReadOnly)) {
+        this->setStyleSheet(qss.readAll());
+        qss.close();
+    }
     connect(ui->loginButton, &QPushButton::clicked, this, &LoginDialog::slot_login);
     connect(ui->registerButton, &QPushButton::clicked, this, &LoginDialog::slot_register);
     connect(ui->resetButton, &QPushButton::clicked, this, &LoginDialog::slot_reset);

@@ -91,12 +91,17 @@ public slots:
 
     void slot_dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
+    void slot_share_file();
+
     static void slot_message(QWidget *parent, const QString &title, const QString &text);
+
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
 
     void dropEvent(QDropEvent *event) override;
-    signals:
+
+signals:
+
     void sig_information(QWidget *parent, const QString &title, const QString &text);
 
 private:

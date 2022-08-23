@@ -9,6 +9,7 @@
 #include <QFontDatabase>
 #include <windows.h>
 #include <dbghelp.h>
+#include <QTranslator>
 #include "log/log.h"
 #include "common.h"
 #include "config.h"
@@ -23,12 +24,11 @@ using std::endl;
 
 Config g_config;
 
-LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
-{
+LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException) {
     //创建 Dump 文件
-    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (hDumpFile != INVALID_HANDLE_VALUE)
-    {
+    HANDLE hDumpFile = CreateFile(L"crash.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
+                                  nullptr);
+    if (hDumpFile != INVALID_HANDLE_VALUE) {
         //Dump信息
         MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
         dumpInfo.ExceptionPointers = pException;
@@ -36,18 +36,19 @@ LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
         dumpInfo.ClientPointers = TRUE;
 
         //写入Dump文件内容
-        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, nullptr, nullptr);
+        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, nullptr,
+                          nullptr);
     }
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
 int main(int argc, char **argv) {
     // 1. 创建缓存文件目录
-    const char* tmp_dir = "./tmp";
+    const char *tmp_dir = "./tmp";
     if (0 != access(tmp_dir, 0)) {
         mkdir(tmp_dir);
     }
-    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
+    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER) ApplicationCrashHandler);//注冊异常捕获函数
     // 2. 接收参数
     g_config.ParseArg(argc, argv);
     Log::instance()->Init(g_config.buff_size);
@@ -56,6 +57,14 @@ int main(int argc, char **argv) {
     QApplication app(argc, argv);
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");//或者"GBK",不分大小写
     QTextCodec::setCodecForLocale(codec);
+
+    LOG_DEBUG("translation")
+    QTranslator translator;
+    if (translator.load(":/qt_zh_CN.qm")) {
+        QCoreApplication::installTranslator(&translator);
+        LOG_DEBUG("translation 安装成功")
+    }
+
     int localFont = QFontDatabase::addApplicationFont(":/PingFang.ttf");
     QString PingFangSC = QFontDatabase::applicationFontFamilies(localFont).at(0);
     cout << PingFangSC.toLocal8Bit().data() << endl;
