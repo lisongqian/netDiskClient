@@ -33,6 +33,12 @@ enum class LocalListHeaderColumn {
     FILE_TIME,
     FILE_PATH,
 };
+enum class ShareListHeaderColumn {
+    USER_NAME = 0,
+    RECEIVER_NAME,
+    FILE_NAME,
+    SHARE_TIME,
+};
 
 class MainWindow : public QMainWindow {
 Q_OBJECT

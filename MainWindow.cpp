@@ -115,6 +115,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(std::make_shar
     ui->uploadTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 
+    m_file_share_model = std::make_shared<QStandardItemModel>();
+    QStringList shareListHeaders;
+    shareListHeaders << "分享人" << "接收用户" << "文件名" << "接收时间";
+    m_file_share_model->setColumnCount(static_cast<int>(shareListHeaders.size()));
+    m_file_share_model->setHorizontalHeaderLabels(shareListHeaders);
+    ui->shareTableView->setModel(m_file_share_model.get());
+    ui->shareTableView->setEditTriggers(QTableView::NoEditTriggers);
+    ui->shareTableView->setShowGrid(false);
+    ui->shareTableView->setSelectionBehavior(QTableView::SelectRows);
+    ui->shareTableView->setSelectionMode(QTableView::SingleSelection);
+    ui->shareTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
 
 
     /*表格双击功能*/
@@ -184,6 +196,7 @@ void MainWindow::changeTab(int currentRow) {
                 break;
             }
             case 3: {
+                slot_updateShareRecords();
                 break;
             }
             default:
@@ -724,7 +737,65 @@ void MainWindow::slot_deleteFile() {
 }
 
 void MainWindow::slot_updateShareRecords() {
-
+//    std::thread thread([=]() {
+    string res;
+    map<string, string> headers;
+    headers["Token"] = g_config.token;
+    map<string, string> data;
+    data["not_use"] = "1";
+    auto req = std::make_shared<HTTPRequest>(g_config.ip.data(), g_config.port);
+    req->init();
+    bool flag = req->post("/sharelist", data, headers, res);
+    if (flag) {
+        try {
+//            LOG_DEBUG("res:%s", res.c_str())
+            Document document;
+            document.Parse(res.c_str());
+            if (document.IsObject() && document.HasMember("status") && document.HasMember("code")) {
+                if (document["status"].GetInt() == 200 && document["code"].GetInt() == 1) {
+                    Value &list = document["data"];
+                    if (list.IsArray()) {
+                        m_file_share_model->removeRows(0,
+                                                       m_file_share_model->rowCount());
+                        m_file_share_model->setRowCount(static_cast<int>(list.Size()));
+                        for (int i = 0; i < list.Size(); ++i) {
+                            Value &item = list[i];
+                            if (item.IsObject()) {
+                                m_file_share_model->setItem(i, static_cast<int>(ShareListHeaderColumn::USER_NAME),
+                                                            new QStandardItem(item["user_name"].GetString()));
+                                m_file_share_model->item(i,
+                                                         static_cast<int>(ShareListHeaderColumn::USER_NAME))->setTextAlignment(
+                                        Qt::AlignCenter);
+                                m_file_share_model->setItem(i, static_cast<int>(ShareListHeaderColumn::RECEIVER_NAME),
+                                                            new QStandardItem(item["receiver_name"].GetString()));
+                                m_file_share_model->item(i,
+                                                         static_cast<int>(ShareListHeaderColumn::RECEIVER_NAME))->setTextAlignment(
+                                        Qt::AlignCenter);
+                                m_file_share_model->setItem(i, static_cast<int>(ShareListHeaderColumn::FILE_NAME),
+                                                            new QStandardItem(item["file_name"].GetString()));
+                                m_file_share_model->item(i,
+                                                         static_cast<int>(ShareListHeaderColumn::FILE_NAME))->setTextAlignment(
+                                        Qt::AlignCenter);
+                                m_file_share_model->setItem(i, static_cast<int>(ShareListHeaderColumn::SHARE_TIME),
+                                                            new QStandardItem(item["share_time"].GetString()));
+                                m_file_share_model->item(i,
+                                                         static_cast<int>(ShareListHeaderColumn::SHARE_TIME))->setTextAlignment(
+                                        Qt::AlignCenter);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                emit sig_information(this, "错误", "请重试");
+            }
+        }
+        catch (std::exception &e) {
+        }
+    }
+    req->close_socket();
+//    });
+//    thread.detach();
 }
 
 void MainWindow::slot_updateUploadRecords() {
